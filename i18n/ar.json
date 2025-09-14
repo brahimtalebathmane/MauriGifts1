@@ -1,0 +1,144 @@
+{
+  "app": {
+    "name": "MauriGift",
+    "loading": "جاري التحميل..."
+  },
+  "auth": {
+    "signup": "إنشاء حساب",
+    "login": "تسجيل الدخول",
+    "name": "الاسم",
+    "phone_number": "رقم الهاتف",
+    "pin": "الرمز (4 أرقام)",
+    "confirm_pin": "تأكيد الرمز",
+    "phone_placeholder": "12345678",
+    "pin_placeholder": "1234",
+    "signup_button": "إنشاء حساب",
+    "login_button": "تسجيل الدخول",
+    "have_account": "لديك حساب؟ سجل الدخول",
+    "no_account": "لا تملك حساب؟ أنشئ حساب جديد",
+    "invalid_phone": "رقم الهاتف يجب أن يكون 8 أرقام",
+    "invalid_pin": "الرمز يجب أن يكون 4 أرقام",
+    "pins_dont_match": "الرمز غير متطابق",
+    "logout": "تسجيل خروج"
+  },
+  "home": {
+    "welcome": "مرحباً بك",
+    "categories": "الفئات",
+    "select_category": "اختر فئة"
+  },
+  "categories": {
+    "pubg": "PUBG Mobile",
+    "free_fire": "Free Fire",
+    "itunes": "iTunes (شحن Apple)",
+    "psn": "PlayStation"
+  },
+  "products": {
+    "select_amount": "اختر الكمية",
+    "price": "السعر",
+    "mru": "أوقية",
+    "buy_now": "اشتري الآن",
+    "uc": "شدة",
+    "diamonds": "جوهرة"
+  },
+  "payment": {
+    "payment_method": "طريقة الدفع",
+    "select_method": "اختر طريقة الدفع",
+    "payment_number": "ادفع إلى الرقم: 41791082",
+    "payment_info": "معلومات الدفع",
+    "sender_name": "اسم المرسل",
+    "sender_number": "رقم الدفع",
+    "receipt_image": "صورة الإيصال",
+    "upload_receipt": "رفع صورة الإيصال",
+    "submit_order": "إرسال الطلب",
+    "order_submitted": "تم إرسال الطلب",
+    "under_review": "تجري مراجعة الطلب من طرف إدارة التطبيق.",
+    "required": "مطلوب",
+    "image_required": "صورة الإيصال مطلوبة"
+  },
+  "payment_methods": {
+    "bankily": "بنكيلي",
+    "sidad": "السداد",
+    "masrvi": "مصرفي",
+    "bimbank": "بيم بنك",
+    "amanati": "أمانتي",
+    "klik": "كليك"
+  },
+  "orders": {
+    "my_orders": "طلباتي",
+    "no_orders": "لا توجد طلبات",
+    "order_details": "تفاصيل الطلب",
+    "status": "الحالة",
+    "product": "المنتج",
+    "payment_method": "طريقة الدفع",
+    "payment_number": "رقم الدفع",
+    "delivery_code": "كود الشحن",
+    "copy_code": "نسخ الكود",
+    "code_copied": "تم نسخ الكود",
+    "order_date": "تاريخ الطلب",
+    "admin_note": "ملاحظة الإدارة"
+  },
+  "order_status": {
+    "awaiting_payment": "في انتظار الدفع",
+    "under_review": "قيد المراجعة",
+    "completed": "مكتمل",
+    "rejected": "مرفوض"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "no_notifications": "لا توجد إشعارات",
+    "mark_all_read": "وضع علامة مقروء على الكل"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "name": "الاسم",
+    "phone": "رقم الهاتف",
+    "role": "الصلاحية",
+    "change_pin": "تغيير الرمز",
+    "save": "حفظ",
+    "saved": "تم الحفظ"
+  },
+  "admin": {
+    "dashboard": "لوحة التحكم",
+    "users": "المستخدمون",
+    "orders": "الطلبات",
+    "logs": "السجلات",
+    "user_details": "تفاصيل المستخدم",
+    "order_count": "عدد الطلبات",
+    "approve": "تأكيد",
+    "reject": "رفض",
+    "delivery_code": "كود الشحن",
+    "rejection_reason": "سبب الرفض",
+    "enter_code": "أدخل كود الشحن",
+    "enter_reason": "أدخل سبب الرفض",
+    "filter_by_status": "فلترة حسب الحالة",
+    "all_statuses": "جميع الحالات",
+    "view_receipt": "عرض الإيصال"
+  },
+  "common": {
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "close": "إغلاق",
+    "ok": "موافق",
+    "error": "خطأ",
+    "success": "نجح",
+    "loading": "جاري التحميل...",
+    "no_data": "لا توجد بيانات",
+    "try_again": "أعد المحاولة",
+    "refresh": "تحديث"
+  },
+  "errors": {
+    "generic": "حدث خطأ غير متوقع",
+    "network": "خطأ في الشبكة",
+    "invalid_credentials": "بيانات غير صحيحة",
+    "session_expired": "انتهت صلاحية الجلسة",
+    "unauthorized": "غير مصرح لك",
+    "not_found": "غير موجود",
+    "validation_error": "خطأ في البيانات المدخلة"
+  }
+}

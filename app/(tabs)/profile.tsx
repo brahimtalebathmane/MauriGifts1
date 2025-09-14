@@ -1,0 +1,249 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Alert,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAppStore } from '../../state/store';
+import { useI18n } from '../../hooks/useI18n';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import { showSuccessToast, showErrorToast } from '../../components/ui/Toast';
+
+export default function ProfileScreen() {
+  const { user, logout } = useAppStore();
+  const { t } = useI18n();
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(user?.name || '');
+
+  const handleLogout = () => {
+    Alert.alert(
+      'تسجيل الخروج',
+      'هل أنت متأكد من تسجيل الخروج؟',
+      [
+        { text: 'إلغاء', style: 'cancel' },
+        {
+          text: 'تسجيل خروج',
+          style: 'destructive',
+          onPress: logout,
+        },
+      ]
+    );
+  };
+
+  const handleSave = () => {
+    // In a real app, you would update the user's name via API
+    showSuccessToast(t('profile.saved'));
+    setEditing(false);
+  };
+
+  const formatPhoneNumber = (phone: string) => {
+    return phone.replace(/(\d{2})(\d{2})(\d{2})(\d{2})/, '$1-$2-$3-$4');
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>{t('profile.title')}</Text>
+      </View>
+
+      <ScrollView style={styles.content}>
+        <Card style={styles.profileCard}>
+          <View style={styles.profileHeader}>
+            <Text style={styles.profileName}>{user?.name}</Text>
+            <Text style={styles.profileRole}>
+              {user?.role === 'admin' ? 'مدير' : 'مستخدم'}
+            </Text>
+          </View>
+        </Card>
+
+        <Card style={styles.infoCard}>
+          <Text style={styles.cardTitle}>المعلومات الشخصية</Text>
+          
+          {editing ? (
+            <Input
+              label={t('auth.name')}
+              value={name}
+              onChangeText={setName}
+              placeholder="أدخل الاسم"
+            />
+          ) : (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoValue}>{user?.name}</Text>
+              <Text style={styles.infoLabel}>{t('profile.name')}:</Text>
+            </View>
+          )}
+
+          <View style={styles.infoRow}>
+            <Text style={styles.infoValue}>
+              {user?.phone_number ? formatPhoneNumber(user.phone_number) : ''}
+            </Text>
+            <Text style={styles.infoLabel}>{t('profile.phone')}:</Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Text style={styles.infoValue}>
+              {user?.role === 'admin' ? 'مدير' : 'مستخدم'}
+            </Text>
+            <Text style={styles.infoLabel}>{t('profile.role')}:</Text>
+          </View>
+
+          <View style={styles.actionButtons}>
+            {editing ? (
+              <View style={styles.buttonRow}>
+                <Button
+                  title={t('common.cancel')}
+                  variant="outline"
+                  onPress={() => {
+                    setEditing(false);
+                    setName(user?.name || '');
+                  }}
+                  style={styles.button}
+                />
+                <Button
+                  title={t('profile.save')}
+                  onPress={handleSave}
+                  style={styles.button}
+                />
+              </View>
+            ) : (
+              <Button
+                title="تعديل المعلومات"
+                variant="outline"
+                onPress={() => setEditing(true)}
+              />
+            )}
+          </View>
+        </Card>
+
+        <Card style={styles.infoCard}>
+          <Text style={styles.cardTitle}>الإعدادات</Text>
+          
+          <Button
+            title={t('profile.change_pin')}
+            variant="outline"
+            onPress={() => {
+              // Navigate to change PIN screen
+              showErrorToast('هذه الميزة قيد التطوير');
+            }}
+            style={styles.settingButton}
+          />
+
+          <Button
+            title={t('auth.logout')}
+            variant="danger"
+            onPress={handleLogout}
+            style={styles.settingButton}
+          />
+        </Card>
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            {t('app.name')} - إصدار 1.0.0
+          </Text>
+          <Text style={styles.footerText}>
+            تم الانضمام في {new Date(user?.created_at || '').toLocaleDateString('ar-SA')}
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  header: {
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    textAlign: 'right',
+  },
+  content: {
+    flex: 1,
+    padding: 16,
+  },
+  profileCard: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  profileHeader: {
+    alignItems: 'center',
+  },
+  profileName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  profileRole: {
+    fontSize: 16,
+    color: '#6B7280',
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
+  },
+  infoCard: {
+    marginBottom: 16,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 16,
+    textAlign: 'right',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  infoLabel: {
+    fontSize: 16,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  infoValue: {
+    fontSize: 16,
+    color: '#1F2937',
+    fontWeight: '600',
+  },
+  actionButtons: {
+    marginTop: 16,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  button: {
+    flex: 1,
+  },
+  settingButton: {
+    marginBottom: 12,
+  },
+  footer: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  footerText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    marginBottom: 4,
+  },
+});
