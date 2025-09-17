@@ -1,5 +1,30 @@
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+
+// Fallback storage for web
+const storage = {
+  async getItem(key: string): Promise<string | null> {
+    if (Platform.OS === 'web') {
+      return localStorage.getItem(key);
+    }
+    return await SecureStore.getItemAsync(key);
+  },
+  async setItem(key: string, value: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      localStorage.setItem(key, value);
+    } else {
+      await SecureStore.setItemAsync(key, value);
+    }
+  },
+  async removeItem(key: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      localStorage.removeItem(key);
+    } else {
+      await SecureStore.deleteItemAsync(key);
+    }
+  },
+};
 
 export interface User {
   id: string;
@@ -110,16 +135,22 @@ export const useAppStore = create<AppState>((set, get) => ({
       notifications: [], 
       unreadCount: 0 
     });
-    await AsyncStorage.multiRemove(['user', 'token']);
+    await Promise.all([
+      storage.removeItem('user'),
+      storage.removeItem('token'),
+    ]);
   },
 
   // Persistence
   loadFromStorage: async () => {
     try {
-      const [userStr, tokenStr] = await AsyncStorage.multiGet(['user', 'token']);
+      const [userStr, tokenStr] = await Promise.all([
+        storage.getItem('user'),
+        storage.getItem('token'),
+      ]);
       
-      const user = userStr[1] ? JSON.parse(userStr[1]) : null;
-      const token = tokenStr[1] || null;
+      const user = userStr ? JSON.parse(userStr) : null;
+      const token = tokenStr || null;
       
       set({ user, token, isLoading: false });
     } catch (error) {
@@ -131,12 +162,13 @@ export const useAppStore = create<AppState>((set, get) => ({
   saveToStorage: async () => {
     try {
       const { user, token } = get();
-      const items: [string, string][] = [
-        ['user', user ? JSON.stringify(user) : ''],
-        ['token', token || ''],
-      ];
       
-      await AsyncStorage.multiSet(items.filter(([_, value]) => value !== ''));
+      if (user) {
+        await storage.setItem('user', JSON.stringify(user));
+      }
+      if (token) {
+        await storage.setItem('token', token);
+      }
     } catch (error) {
       console.error('Error saving to storage:', error);
     }

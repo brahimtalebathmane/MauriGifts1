@@ -43,7 +43,7 @@
   "payment": {
     "payment_method": "طريقة الدفع",
     "select_method": "اختر طريقة الدفع",
-    "payment_number": "ادفع إلى الرقم: 41791082",
+    "payment_number": "ادفع إلى الرقم:",
     "payment_info": "معلومات الدفع",
     "sender_name": "اسم المرسل",
     "sender_number": "رقم الدفع",

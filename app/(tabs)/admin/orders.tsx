@@ -7,6 +7,7 @@ import {
   RefreshControl,
   Modal,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClipboardList, Eye, X } from 'lucide-react-native';
@@ -50,6 +51,7 @@ export default function AdminOrdersScreen() {
   const [refreshing, setRefreshing] = React.useState(false);
   const [selectedOrder, setSelectedOrder] = React.useState<AdminOrder | null>(null);
   const [modalVisible, setModalVisible] = React.useState(false);
+  const [receiptModal, setReceiptModal] = React.useState(false);
   const [deliveryCode, setDeliveryCode] = React.useState('');
   const [rejectionReason, setRejectionReason] = React.useState('');
   const [actionLoading, setActionLoading] = React.useState(false);
@@ -135,6 +137,13 @@ export default function AdminOrdersScreen() {
     setSelectedOrder(null);
     setDeliveryCode('');
     setRejectionReason('');
+  };
+
+  const viewReceipt = (order: AdminOrder) => {
+    if (order.receipt_path) {
+      setSelectedOrder(order);
+      setReceiptModal(true);
+    }
   };
 
   const formatPhoneNumber = (phone: string) => {
@@ -255,6 +264,15 @@ export default function AdminOrdersScreen() {
               </View>
 
               <View style={styles.actions}>
+                {order.receipt_path && (
+                  <Button
+                    title="عرض الإيصال"
+                    size="small"
+                    variant="outline"
+                    onPress={() => viewReceipt(order)}
+                    style={styles.actionButton}
+                  />
+                )}
                 <Button
                   title="عرض التفاصيل"
                   size="small"
@@ -276,11 +294,10 @@ export default function AdminOrdersScreen() {
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <Button
-              title=""
+              title="إغلاق"
               onPress={closeModal}
               variant="outline"
               size="small"
-              style={styles.closeButton}
             />
             <Text style={styles.modalTitle}>تفاصيل الطلب</Text>
           </View>
@@ -354,10 +371,55 @@ export default function AdminOrdersScreen() {
                     </Text>
                   </Card>
                 )}
+
+                {selectedOrder.receipt_path && (
+                  <Card style={styles.modalCard}>
+                    <Text style={styles.sectionTitle}>الإيصال</Text>
+                    <Button
+                      title="عرض الإيصال"
+                      variant="outline"
+                      onPress={() => viewReceipt(selectedOrder)}
+                    />
+                  </Card>
+                )}
               </>
             )}
           </ScrollView>
         </SafeAreaView>
+      </Modal>
+
+      {/* Receipt Modal */}
+      <Modal
+        visible={receiptModal}
+        animationType="fade"
+        transparent={true}
+      >
+        <View style={styles.receiptModalContainer}>
+          <View style={styles.receiptModalContent}>
+            <View style={styles.receiptHeader}>
+              <Button
+                title=""
+                onPress={() => setReceiptModal(false)}
+                variant="outline"
+                size="small"
+                style={styles.closeButton}
+              >
+                <X size={20} color="#374151" />
+              </Button>
+              <Text style={styles.receiptTitle}>إيصال الدفع</Text>
+            </View>
+            
+            {selectedOrder?.receipt_path && (
+              <Image
+                source={{ 
+                  uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/public/receipts/${selectedOrder.receipt_path}` 
+                }}
+                style={styles.receiptImage}
+                resizeMode="contain"
+              />
+            )}
+          </View>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -448,6 +510,10 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    gap: 8,
+  },
+  actionButton: {
+    marginBottom: 8,
   },
   modalContainer: {
     flex: 1,
@@ -461,12 +527,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    paddingHorizontal: 0,
   },
   modalTitle: {
     fontSize: 20,
@@ -505,9 +565,6 @@ const styles = StyleSheet.create({
   actionButtons: {
     marginBottom: 16,
   },
-  actionButton: {
-    marginBottom: 8,
-  },
   deliveryCode: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -524,6 +581,46 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: '#FEE2E2',
     borderRadius: 8,
+  },
+  receiptModalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  receiptModalContent: {
+    width: '90%',
+    maxHeight: '80%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  receiptHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: '#F9FAFB',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  closeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    paddingHorizontal: 0,
+  },
+  receiptTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    flex: 1,
+    textAlign: 'right',
+    marginRight: 12,
+  },
+  receiptImage: {
+    width: '100%',
+    height: 400,
   },
   skeletonMargin: {
     marginVertical: 8,

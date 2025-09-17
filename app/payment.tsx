@@ -38,6 +38,24 @@ export default function PaymentScreen() {
   const [receiptImage, setReceiptImage] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [paymentPhoneNumber, setPaymentPhoneNumber] = useState('41791082');
+
+  useEffect(() => {
+    // Load payment number from settings
+    const loadPaymentNumber = async () => {
+      try {
+        const response = await api.adminManageSettings(token || '', 'get');
+        if (response.data?.settings?.payment_number) {
+          setPaymentPhoneNumber(response.data.settings.payment_number);
+        }
+      } catch (error) {
+        // Use default if can't load
+        console.log('Using default payment number');
+      }
+    };
+    
+    loadPaymentNumber();
+  }, [token]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -94,7 +112,7 @@ export default function PaymentScreen() {
       }
 
       showSuccessToast(t('payment.order_submitted'));
-      router.replace('/orders');
+      router.replace('/(tabs)/orders');
 
     } catch (error) {
       console.error('Payment error:', error);
@@ -113,7 +131,9 @@ export default function PaymentScreen() {
           variant="outline"
           size="small"
           style={styles.backButton}
-        />
+        >
+          <ArrowRight size={20} color="#374151" />
+        </Button>
         <Text style={styles.title}>
           {t('payment.payment_method')}
         </Text>
@@ -123,9 +143,9 @@ export default function PaymentScreen() {
         {/* Payment Number Banner */}
         <Card style={styles.bannerCard}>
           <Text style={styles.bannerText}>
-            {t('payment.payment_number')}
+            ادفع إلى الرقم:
           </Text>
-          <Text style={styles.phoneNumber}>41791082</Text>
+          <Text style={styles.phoneNumber}>{paymentPhoneNumber}</Text>
         </Card>
 
         {/* Product Info */}

@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-import { Chrome as Home, ShoppingBag, Bell, User, Users, ClipboardList } from 'lucide-react-native';
+import { Chrome as Home, ShoppingBag, Bell, User, Users, ClipboardList, Settings } from 'lucide-react-native';
 import { useAppStore } from '../../state/store';
 import { useI18n } from '../../hooks/useI18n';
 
@@ -96,6 +96,16 @@ export default function TabLayout() {
               title: t('admin.orders'),
               tabBarIcon: ({ color, size }) => (
                 <ClipboardList size={size} color={color} />
+              ),
+            }}
+          />
+
+          <Tabs.Screen
+            name="admin/products"
+            options={{
+              title: 'إدارة المنتجات',
+              tabBarIcon: ({ color, size }) => (
+                <Settings size={size} color={color} />
               ),
             }}
           />

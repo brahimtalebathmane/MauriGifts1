@@ -160,6 +160,50 @@ class ApiClient {
       }),
     });
   }
+
+  // Change PIN
+  async changePin(token: string, currentPin: string, newPin: string) {
+    return this.request('change_pin', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        current_pin: currentPin,
+        new_pin: newPin,
+      }),
+    });
+  }
+
+  // Admin product management
+  async adminManageProducts(
+    token: string,
+    action: 'list' | 'create' | 'update' | 'delete',
+    product?: any
+  ) {
+    return this.request('admin_manage_products', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        action,
+        product,
+      }),
+    });
+  }
+
+  // Admin settings management
+  async adminManageSettings(
+    token: string,
+    action: 'get' | 'update',
+    settings?: Record<string, any>
+  ) {
+    return this.request('admin_manage_settings', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        action,
+        settings,
+      }),
+    });
+  }
 }
 
 export const api = new ApiClient();

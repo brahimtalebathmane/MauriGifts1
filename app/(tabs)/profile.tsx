@@ -5,9 +5,12 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 import { useAppStore } from '../../state/store';
+import { api } from '../../lib/api';
 import { useI18n } from '../../hooks/useI18n';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -15,10 +18,17 @@ import Input from '../../components/ui/Input';
 import { showSuccessToast, showErrorToast } from '../../components/ui/Toast';
 
 export default function ProfileScreen() {
-  const { user, logout } = useAppStore();
+  const { user, token, logout } = useAppStore();
   const { t } = useI18n();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
+  const [changePinModal, setChangePinModal] = useState(false);
+  const [pinData, setPinData] = useState({
+    currentPin: '',
+    newPin: '',
+    confirmPin: '',
+  });
+  const [pinLoading, setPinLoading] = useState(false);
 
   const handleLogout = () => {
     Alert.alert(
@@ -29,7 +39,10 @@ export default function ProfileScreen() {
         {
           text: 'تسجيل خروج',
           style: 'destructive',
-          onPress: logout,
+          onPress: async () => {
+            await logout();
+            router.replace('/auth/login');
+          },
         },
       ]
     );
@@ -39,6 +52,38 @@ export default function ProfileScreen() {
     // In a real app, you would update the user's name via API
     showSuccessToast(t('profile.saved'));
     setEditing(false);
+  };
+
+  const handleChangePin = async () => {
+    if (!token) return;
+
+    if (pinData.newPin !== pinData.confirmPin) {
+      showErrorToast(t('auth.pins_dont_match'));
+      return;
+    }
+
+    if (!/^\d{4}$/.test(pinData.currentPin) || !/^\d{4}$/.test(pinData.newPin)) {
+      showErrorToast(t('auth.invalid_pin'));
+      return;
+    }
+
+    setPinLoading(true);
+    try {
+      const response = await api.changePin(token, pinData.currentPin, pinData.newPin);
+      
+      if (response.data) {
+        showSuccessToast('تم تغيير الرمز بنجاح');
+        setChangePinModal(false);
+        setPinData({ currentPin: '', newPin: '', confirmPin: '' });
+      } else {
+        showErrorToast(response.error || 'خطأ في تغيير الرمز');
+      }
+    } catch (error) {
+      console.error('Change PIN error:', error);
+      showErrorToast(t('errors.network'));
+    } finally {
+      setPinLoading(false);
+    }
   };
 
   const formatPhoneNumber = (phone: string) => {
@@ -126,10 +171,7 @@ export default function ProfileScreen() {
           <Button
             title={t('profile.change_pin')}
             variant="outline"
-            onPress={() => {
-              // Navigate to change PIN screen
-              showErrorToast('هذه الميزة قيد التطوير');
-            }}
+            onPress={() => setChangePinModal(true)}
             style={styles.settingButton}
           />
 
@@ -150,6 +192,70 @@ export default function ProfileScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      {/* Change PIN Modal */}
+      <Modal
+        visible={changePinModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Button
+              title="إلغاء"
+              onPress={() => {
+                setChangePinModal(false);
+                setPinData({ currentPin: '', newPin: '', confirmPin: '' });
+              }}
+              variant="outline"
+              size="small"
+            />
+            <Text style={styles.modalTitle}>تغيير الرمز</Text>
+          </View>
+
+          <ScrollView style={styles.modalContent}>
+            <Card style={styles.modalCard}>
+              <Input
+                label="الرمز الحالي"
+                value={pinData.currentPin}
+                onChangeText={(value) => setPinData(prev => ({ ...prev, currentPin: value }))}
+                placeholder="أدخل الرمز الحالي"
+                keyboardType="number-pad"
+                maxLength={4}
+                secureTextEntry
+              />
+
+              <Input
+                label="الرمز الجديد"
+                value={pinData.newPin}
+                onChangeText={(value) => setPinData(prev => ({ ...prev, newPin: value }))}
+                placeholder="أدخل الرمز الجديد"
+                keyboardType="number-pad"
+                maxLength={4}
+                secureTextEntry
+              />
+
+              <Input
+                label="تأكيد الرمز الجديد"
+                value={pinData.confirmPin}
+                onChangeText={(value) => setPinData(prev => ({ ...prev, confirmPin: value }))}
+                placeholder="أعد إدخال الرمز الجديد"
+                keyboardType="number-pad"
+                maxLength={4}
+                secureTextEntry
+              />
+
+              <Button
+                title="تغيير الرمز"
+                onPress={handleChangePin}
+                loading={pinLoading}
+                disabled={!pinData.currentPin || !pinData.newPin || !pinData.confirmPin}
+                style={styles.changePinButton}
+              />
+            </Card>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -245,5 +351,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#9CA3AF',
     marginBottom: 4,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    flex: 1,
+    textAlign: 'right',
+    marginRight: 16,
+  },
+  modalContent: {
+    flex: 1,
+    padding: 16,
+  },
+  modalCard: {
+    marginBottom: 16,
+  },
+  changePinButton: {
+    marginTop: 16,
   },
 });

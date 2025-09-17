@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
@@ -25,11 +26,13 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
   const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-    if (status !== 'granted') {
-      Alert.alert('إذن مطلوب', 'نحتاج إذن للوصول إلى مكتبة الصور');
-      return;
+    if (Platform.OS !== 'web') {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert('إذن مطلوب', 'نحتاج إذن للوصول إلى مكتبة الصور');
+        return;
+      }
     }
 
     setLoading(true);
@@ -40,24 +43,35 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
+        base64: true,
       });
 
       if (!result.canceled && result.assets[0]) {
-        await processImage(result.assets[0].uri);
+        const asset = result.assets[0];
+        if (asset.base64) {
+          // Use the base64 directly if available
+          onImageSelected(asset.base64, 'jpg');
+        } else {
+          // Fallback to processing the URI
+          await processImage(asset.uri);
+        }
       }
     } catch (error) {
       console.error('Error picking image:', error);
+      Alert.alert('خطأ', 'حدث خطأ في اختيار الصورة');
     } finally {
       setLoading(false);
     }
   };
 
   const takePhoto = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    
-    if (status !== 'granted') {
-      Alert.alert('إذن مطلوب', 'نحتاج إذن للوصول إلى الكاميرا');
-      return;
+    if (Platform.OS !== 'web') {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert('إذن مطلوب', 'نحتاج إذن للوصول إلى الكاميرا');
+        return;
+      }
     }
 
     setLoading(true);
@@ -67,13 +81,22 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
+        base64: true,
       });
 
       if (!result.canceled && result.assets[0]) {
-        await processImage(result.assets[0].uri);
+        const asset = result.assets[0];
+        if (asset.base64) {
+          // Use the base64 directly if available
+          onImageSelected(asset.base64, 'jpg');
+        } else {
+          // Fallback to processing the URI
+          await processImage(asset.uri);
+        }
       }
     } catch (error) {
       console.error('Error taking photo:', error);
+      Alert.alert('خطأ', 'حدث خطأ في التقاط الصورة');
     } finally {
       setLoading(false);
     }
@@ -98,15 +121,20 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
   };
 
   const showActionSheet = () => {
-    Alert.alert(
-      'اختر صورة',
-      'كيف تريد إضافة صورة الإيصال؟',
-      [
-        { text: 'الكاميرا', onPress: takePhoto },
-        { text: 'مكتبة الصور', onPress: pickImage },
-        { text: 'إلغاء', style: 'cancel' },
-      ]
-    );
+    if (Platform.OS === 'web') {
+      // On web, only show gallery option
+      pickImage();
+    } else {
+      Alert.alert(
+        'اختر صورة',
+        'كيف تريد إضافة صورة الإيصال؟',
+        [
+          { text: 'الكاميرا', onPress: takePhoto },
+          { text: 'مكتبة الصور', onPress: pickImage },
+          { text: 'إلغاء', style: 'cancel' },
+        ]
+      );
+    }
   };
 
   return (
