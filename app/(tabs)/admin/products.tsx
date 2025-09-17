@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Settings, Plus, Edit, Trash2, X } from 'lucide-react-native';
+import { Settings, Plus, CreditCard as Edit, Trash2, X } from 'lucide-react-native';
 import { useAppStore } from '../../../state/store';
 import { api } from '../../../lib/api';
 import { useI18n } from '../../../hooks/useI18n';
