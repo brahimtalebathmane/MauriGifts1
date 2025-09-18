@@ -10,7 +10,8 @@ import {
 import * as Haptics from 'expo-haptics';
 
 interface ButtonProps {
-  title: string;
+  title?: string;
+  children?: React.ReactNode;
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'outline' | 'danger';
   size?: 'small' | 'medium' | 'large';
@@ -22,6 +23,7 @@ interface ButtonProps {
 
 const Button: React.FC<ButtonProps> = ({
   title,
+  children,
   onPress,
   variant = 'primary',
   size = 'medium',
@@ -66,7 +68,7 @@ const Button: React.FC<ButtonProps> = ({
           size="small"
         />
       ) : (
-        <Text style={textStyles}>{title}</Text>
+        children ? children : <Text style={textStyles}>{title}</Text>
       )}
     </TouchableOpacity>
   );

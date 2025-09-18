@@ -26,18 +26,21 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
   const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
-    if (Platform.OS !== 'web') {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
-      if (status !== 'granted') {
-        Alert.alert('إذن مطلوب', 'نحتاج إذن للوصول إلى مكتبة الصور');
-        return;
-      }
-    }
 
     setLoading(true);
     
     try {
+      // Request permissions for non-web platforms
+      if (Platform.OS !== 'web') {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        
+        if (status !== 'granted') {
+          Alert.alert('إذن مطلوب', 'نحتاج إذن للوصول إلى مكتبة الصور');
+          setLoading(false);
+          return;
+        }
+      }
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -48,13 +51,9 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
-        if (asset.base64) {
-          // Use the base64 directly if available
-          onImageSelected(asset.base64, 'jpg');
-        } else {
-          // Fallback to processing the URI
-          await processImage(asset.uri);
-        }
+        
+        // Always process the image to ensure consistency
+        await processImage(asset.uri, asset.base64);
       }
     } catch (error) {
       console.error('Error picking image:', error);
@@ -65,18 +64,21 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
   };
 
   const takePhoto = async () => {
-    if (Platform.OS !== 'web') {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      
-      if (status !== 'granted') {
-        Alert.alert('إذن مطلوب', 'نحتاج إذن للوصول إلى الكاميرا');
-        return;
-      }
-    }
 
     setLoading(true);
     
     try {
+      // Request permissions for non-web platforms
+      if (Platform.OS !== 'web') {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        
+        if (status !== 'granted') {
+          Alert.alert('إذن مطلوب', 'نحتاج إذن للوصول إلى الكاميرا');
+          setLoading(false);
+          return;
+        }
+      }
+
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
         aspect: [4, 3],
@@ -86,13 +88,9 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
-        if (asset.base64) {
-          // Use the base64 directly if available
-          onImageSelected(asset.base64, 'jpg');
-        } else {
-          // Fallback to processing the URI
-          await processImage(asset.uri);
-        }
+        
+        // Always process the image to ensure consistency
+        await processImage(asset.uri, asset.base64);
       }
     } catch (error) {
       console.error('Error taking photo:', error);
@@ -102,8 +100,14 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
     }
   };
 
-  const processImage = async (uri: string) => {
+  const processImage = async (uri: string, existingBase64?: string) => {
     try {
+      // If we already have base64, use it directly
+      if (existingBase64) {
+        onImageSelected(existingBase64, 'jpg');
+        return;
+      }
+
       // Resize image to reduce file size
       const manipulatedImage = await ImageManipulator.manipulateAsync(
         uri,
@@ -113,6 +117,8 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
 
       if (manipulatedImage.base64) {
         onImageSelected(manipulatedImage.base64, 'jpg');
+      } else {
+        throw new Error('فشل في معالجة الصورة');
       }
     } catch (error) {
       console.error('Error processing image:', error);

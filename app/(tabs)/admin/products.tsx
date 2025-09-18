@@ -55,9 +55,12 @@ export default function AdminProductsScreen() {
   const [formData, setFormData] = useState({
     category: 'pubg' as const,
     name: '',
+    title: '',
     sku: '',
     price_mru: '',
     active: true,
+    amount: '',
+    currency: '',
   });
 
   const loadData = async (isRefresh = false) => {
@@ -98,18 +101,24 @@ export default function AdminProductsScreen() {
       setFormData({
         category: product.category,
         name: product.name,
+        title: product.meta?.title || '',
         sku: product.sku,
         price_mru: product.price_mru.toString(),
         active: product.active,
+        amount: product.meta?.amount || '',
+        currency: product.meta?.currency || '',
       });
     } else {
       setEditingProduct(null);
       setFormData({
         category: 'pubg',
         name: '',
+        title: '',
         sku: '',
         price_mru: '',
         active: true,
+        amount: '',
+        currency: '',
       });
     }
     setModalVisible(true);
@@ -121,14 +130,17 @@ export default function AdminProductsScreen() {
     setFormData({
       category: 'pubg',
       name: '',
+      title: '',
       sku: '',
       price_mru: '',
       active: true,
+      amount: '',
+      currency: '',
     });
   };
 
   const handleSaveProduct = async () => {
-    if (!token || !formData.name || !formData.sku || !formData.price_mru) {
+    if (!token || !formData.name || !formData.title || !formData.sku || !formData.price_mru) {
       showErrorToast('جميع الحقول مطلوبة');
       return;
     }
@@ -142,8 +154,16 @@ export default function AdminProductsScreen() {
     setActionLoading(true);
     try {
       const productData = {
-        ...formData,
+        category: formData.category,
+        name: formData.name,
+        sku: formData.sku,
         price_mru: price,
+        active: formData.active,
+        meta: {
+          title: formData.title,
+          amount: formData.amount,
+          currency: formData.currency,
+        },
         ...(editingProduct && { id: editingProduct.id }),
       };
 
@@ -330,6 +350,12 @@ export default function AdminProductsScreen() {
 
                 <View style={styles.detailRow}>
                   <Text style={styles.detailValue}>
+                    {product.meta?.title || product.name}
+                  </Text>
+                  <Text style={styles.detailLabel}>العنوان:</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailValue}>
                     {product.price_mru} أوقية
                   </Text>
                   <Text style={styles.detailLabel}>السعر:</Text>
@@ -392,6 +418,13 @@ export default function AdminProductsScreen() {
               />
 
               <Input
+                label="عنوان المنتج (يظهر للمستخدم)"
+                value={formData.title}
+                onChangeText={(value) => setFormData(prev => ({ ...prev, title: value }))}
+                placeholder="مثال: 60 شدة"
+              />
+
+              <Input
                 label="رمز المنتج (SKU)"
                 value={formData.sku}
                 onChangeText={(value) => setFormData(prev => ({ ...prev, sku: value }))}
@@ -406,6 +439,26 @@ export default function AdminProductsScreen() {
                 keyboardType="numeric"
               />
 
+              <View style={styles.formRow}>
+                <Text style={styles.formLabel}>تفاصيل إضافية</Text>
+                <View style={styles.metaRow}>
+                  <Input
+                    label="الكمية"
+                    value={formData.amount}
+                    onChangeText={(value) => setFormData(prev => ({ ...prev, amount: value }))}
+                    placeholder="60"
+                    containerStyle={styles.halfInput}
+                    keyboardType="numeric"
+                  />
+                  <Input
+                    label="العملة"
+                    value={formData.currency}
+                    onChangeText={(value) => setFormData(prev => ({ ...prev, currency: value }))}
+                    placeholder="UC أو Diamonds"
+                    containerStyle={styles.halfInput}
+                  />
+                </View>
+              </View>
               <View style={styles.switchRow}>
                 <Button
                   title={formData.active ? 'نشط' : 'غير نشط'}
@@ -420,7 +473,7 @@ export default function AdminProductsScreen() {
                 title={editingProduct ? 'تحديث المنتج' : 'إضافة المنتج'}
                 onPress={handleSaveProduct}
                 loading={actionLoading}
-                disabled={!formData.name || !formData.sku || !formData.price_mru}
+                disabled={!formData.name || !formData.title || !formData.sku || !formData.price_mru}
                 style={styles.saveButton}
               />
             </Card>
@@ -643,6 +696,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#374151',
+  },
+  metaRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  halfInput: {
+    flex: 1,
   },
   saveButton: {
     marginTop: 16,

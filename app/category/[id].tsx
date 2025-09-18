@@ -34,7 +34,11 @@ export default function CategoryScreen() {
   const handleProductSelect = (product: Product) => {
     router.push({
       pathname: '/payment',
-      params: { productId: product.id, productName: product.name }
+      params: { 
+        productId: product.id, 
+        productName: product.name,
+        productPrice: product.price_mru.toString()
+      }
     });
   };
 
@@ -44,7 +48,10 @@ export default function CategoryScreen() {
 
   const getProductAmount = (product: Product) => {
     const meta = product.meta;
-    if (meta?.amount) {
+    if (meta?.title) {
+      return meta.title;
+    }
+    if (meta?.amount && meta?.currency) {
       return `${meta.amount} ${meta.currency === 'UC' ? t('products.uc') : 
         meta.currency === 'Diamonds' ? t('products.diamonds') : meta.currency}`;
     }

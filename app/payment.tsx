@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import {
   View,
   Text,
@@ -28,7 +29,7 @@ const PAYMENT_METHODS = {
 };
 
 export default function PaymentScreen() {
-  const { productId, productName } = useLocalSearchParams();
+  const { productId, productName, productPrice } = useLocalSearchParams();
   const { token } = useAppStore();
   const { t } = useI18n();
 
@@ -44,9 +45,11 @@ export default function PaymentScreen() {
     // Load payment number from settings
     const loadPaymentNumber = async () => {
       try {
-        const response = await api.adminManageSettings(token || '', 'get');
-        if (response.data?.settings?.payment_number) {
-          setPaymentPhoneNumber(response.data.settings.payment_number);
+        if (token) {
+          const response = await api.adminManageSettings(token, 'get');
+          if (response.data?.settings?.payment_number) {
+            setPaymentPhoneNumber(response.data.settings.payment_number);
+          }
         }
       } catch (error) {
         // Use default if can't load
@@ -54,7 +57,9 @@ export default function PaymentScreen() {
       }
     };
     
-    loadPaymentNumber();
+    if (token) {
+      loadPaymentNumber();
+    }
   }, [token]);
 
   const validateForm = () => {
@@ -151,6 +156,11 @@ export default function PaymentScreen() {
         {/* Product Info */}
         <Card style={styles.productCard}>
           <Text style={styles.productName}>{productName}</Text>
+          {productPrice && (
+            <Text style={styles.productPrice}>
+              {productPrice} {t('products.mru')}
+            </Text>
+          )}
         </Card>
 
         {/* Payment Method Selection */}
@@ -294,6 +304,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#1F2937',
+  },
+  productPrice: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#2563EB',
+    marginTop: 4,
   },
   methodCard: {
     marginBottom: 16,
