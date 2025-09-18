@@ -128,7 +128,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   setLoading: (isLoading) => set({ isLoading }),
 
   logout: async () => {
-    console.log('Logging out user...');
     set({ 
       user: null, 
       token: null, 
@@ -144,7 +143,6 @@ export const useAppStore = create<AppState>((set, get) => ({
         storage.removeItem('user'),
         storage.removeItem('token'),
       ]);
-      console.log('Storage cleared successfully');
     } catch (error) {
       console.error('Error clearing storage:', error);
     }

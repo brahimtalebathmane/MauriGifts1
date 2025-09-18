@@ -35,8 +35,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Create order function called');
-    
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -44,12 +42,9 @@ Deno.serve(async (req) => {
     );
 
     const body = await req.json();
-    console.log('Request body:', body);
-    
     const { token, product_id, payment_method, payment_number } = createOrderSchema.parse(body);
 
     const userId = await validateSession(supabase, token);
-    console.log('User ID:', userId);
 
     // Verify product exists and is active
     const { data: product, error: productError } = await supabase
@@ -59,10 +54,7 @@ Deno.serve(async (req) => {
       .eq('active', true)
       .single();
 
-    console.log('Product found:', product);
-    
     if (productError || !product) {
-      console.error('Product error:', productError);
       return new Response(
         JSON.stringify({ error: 'المنتج غير متوفر' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -82,8 +74,6 @@ Deno.serve(async (req) => {
       .select()
       .single();
 
-    console.log('Order created:', order);
-    
     if (orderError) throw orderError;
 
     return new Response(

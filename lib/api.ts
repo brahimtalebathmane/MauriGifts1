@@ -78,7 +78,6 @@ class ApiClient {
     paymentMethod: string,
     paymentNumber: string
   ) {
-    console.log('Creating order with:', { productId, paymentMethod, paymentNumber });
     return this.request('create_order', {
       method: 'POST',
       body: JSON.stringify({

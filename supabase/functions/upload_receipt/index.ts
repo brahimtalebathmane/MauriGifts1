@@ -65,16 +65,6 @@ Deno.serve(async (req) => {
     const fileData = Uint8Array.from(atob(fileBase64), c => c.charCodeAt(0));
     
     // Generate unique filename
-      // Update order status to under_review after receipt upload
-      const { error: updateError } = await supabase
-        .from('orders')
-        .update({ status: 'under_review' })
-        .eq('id', order_id);
-
-      if (updateError) {
-        console.error('Error updating order status:', updateError);
-      }
-
     const timestamp = Date.now();
     const fileName = `receipts/${order_id}/${timestamp}.${fileExt}`;
 
@@ -91,7 +81,10 @@ Deno.serve(async (req) => {
     // Update order with receipt path
     const { error: updateError } = await supabase
       .from('orders')
-      .update({ receipt_path: uploadData.path })
+      .update({ 
+        receipt_path: uploadData.path,
+        status: 'under_review'
+      })
       .eq('id', order_id);
 
     if (updateError) throw updateError;
