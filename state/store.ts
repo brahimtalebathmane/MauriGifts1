@@ -131,9 +131,11 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ 
       user: null, 
       token: null, 
-      orders: [], 
-      notifications: [], 
-      unreadCount: 0 
+      orders: [],
+      notifications: [],
+      unreadCount: 0,
+      products: {},
+      isLoading: false
     });
     await Promise.all([
       storage.removeItem('user'),
