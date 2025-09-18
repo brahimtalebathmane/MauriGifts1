@@ -124,10 +124,15 @@ export default function PaymentScreen() {
       }
 
       showSuccessToast(t('payment.order_submitted'));
+      
+      // Navigate back to orders screen after successful submission
+      setTimeout(() => {
+        router.replace('/(tabs)/orders');
+      }, 1500);
 
     } catch (error) {
       console.error('Payment error:', error);
-      showErrorToast(t('errors.generic'));
+      showErrorToast('خطأ في إرسال الطلب');
     } finally {
       setLoading(false);
     }
