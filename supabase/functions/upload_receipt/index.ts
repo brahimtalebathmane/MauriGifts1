@@ -94,8 +94,8 @@ Deno.serve(async (req) => {
       .from('notifications')
       .insert({
         user_id: userId,
-        title: 'تم استلام إيصال الدفع',
-        body: `تم استلام إيصال الدفع لطلب ${order.products?.name || 'المنتج'}. جاري مراجعة الطلب.`,
+        title: 'تم إرسال الطلب بنجاح',
+        body: `تم إرسال طلبك بنجاح وهو الآن قيد المراجعة من قبل الإدارة.`,
         payload: { order_id },
       });
 

@@ -128,7 +128,7 @@ export default function PaymentScreen() {
         return;
       }
 
-      showSuccessToast(t('payment.order_submitted'));
+      showSuccessToast('تم إرسال الطلب بنجاح');
       
       // Navigate back to orders screen after successful submission
       setTimeout(() => {
