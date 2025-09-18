@@ -95,6 +95,7 @@ export default function PaymentScreen() {
         token,
         productId as string,
         selectedMethod,
+        paymentNumber
       );
 
       if (orderResponse.error || !orderResponse.data) {
