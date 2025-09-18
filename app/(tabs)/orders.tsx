@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Copy } from 'lucide-react-native';
@@ -53,8 +54,15 @@ export default function OrdersScreen() {
   }, [token]);
 
   const handleCopyCode = async (code: string) => {
+    if (!code) {
+      showErrorToast('لا يوجد كود للنسخ');
+      return;
+    }
+
     await Clipboard.setStringAsync(code);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     showSuccessToast(t('orders.code_copied'));
   };
 

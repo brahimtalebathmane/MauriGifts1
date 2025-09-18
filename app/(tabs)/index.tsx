@@ -55,6 +55,11 @@ export default function HomeScreen() {
   }, []);
 
   const handleCategoryPress = (category: string) => {
+    const categoryProducts = products[category];
+    if (!categoryProducts || categoryProducts.length === 0) {
+      showErrorToast('لا توجد منتجات متاحة في هذه الفئة');
+      return;
+    }
     router.push(`/category/${category}`);
   };
 

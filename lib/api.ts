@@ -78,6 +78,10 @@ class ApiClient {
     paymentMethod: string,
     paymentNumber: string
   ) {
+    if (!token || !productId || !paymentMethod || !paymentNumber) {
+      return { error: 'جميع البيانات مطلوبة' };
+    }
+
     return this.request('create_order', {
       method: 'POST',
       body: JSON.stringify({
@@ -95,6 +99,10 @@ class ApiClient {
     fileBase64: string,
     fileExt: string
   ) {
+    if (!token || !orderId || !fileBase64 || !fileExt) {
+      return { error: 'جميع البيانات مطلوبة لرفع الإيصال' };
+    }
+
     return this.request('upload_receipt', {
       method: 'POST',
       body: JSON.stringify({

@@ -32,12 +32,18 @@ export default function CategoryScreen() {
   const categoryImage = CATEGORY_IMAGES[id as keyof typeof CATEGORY_IMAGES];
 
   const handleProductSelect = (product: Product) => {
+    if (!product.active) {
+      showErrorToast('هذا المنتج غير متوفر حالياً');
+      return;
+    }
+
     router.push({
       pathname: '/payment',
       params: { 
         productId: product.id, 
         productName: product.name,
-        productPrice: product.price_mru.toString()
+        productPrice: product.price_mru.toString(),
+        productCategory: product.category
       }
     });
   };

@@ -87,6 +87,11 @@ export default function PaymentScreen() {
       return;
     }
 
+    if (!token) {
+      showErrorToast('جلسة غير صالحة، يرجى تسجيل الدخول مرة أخرى');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -99,11 +104,11 @@ export default function PaymentScreen() {
       );
 
       if (orderResponse.error || !orderResponse.data) {
-        showErrorToast(orderResponse.error);
+        showErrorToast(orderResponse.error || 'خطأ في إنشاء الطلب');
         return;
       }
 
-      const orderId = orderResponse.data.id;
+      const orderId = orderResponse.data.order_id;
       
       if (!orderId) {
         showErrorToast('خطأ في إنشاء الطلب');
@@ -132,7 +137,7 @@ export default function PaymentScreen() {
 
     } catch (error) {
       console.error('Payment error:', error);
-      showErrorToast('خطأ في إرسال الطلب');
+      showErrorToast(t('errors.network'));
     } finally {
       setLoading(false);
     }

@@ -86,6 +86,11 @@ export default function AdminOrdersScreen() {
   const handleApproveOrder = async () => {
     if (!selectedOrder || !deliveryCode.trim() || !token) return;
 
+    if (selectedOrder.status !== 'under_review') {
+      showErrorToast('يمكن تأكيد الطلبات قيد المراجعة فقط');
+      return;
+    }
+
     setActionLoading(true);
     try {
       const response = await api.adminApproveOrder(token, selectedOrder.id, deliveryCode.trim());
@@ -106,6 +111,11 @@ export default function AdminOrdersScreen() {
 
   const handleRejectOrder = async () => {
     if (!selectedOrder || !rejectionReason.trim() || !token) return;
+
+    if (selectedOrder.status !== 'under_review') {
+      showErrorToast('يمكن رفض الطلبات قيد المراجعة فقط');
+      return;
+    }
 
     setActionLoading(true);
     try {

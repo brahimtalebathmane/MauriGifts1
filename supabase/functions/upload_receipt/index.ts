@@ -89,6 +89,27 @@ Deno.serve(async (req) => {
 
     if (updateError) throw updateError;
 
+    // Create notification for user
+    await supabase
+      .from('notifications')
+      .insert({
+        user_id: userId,
+        title: 'تم استلام إيصال الدفع',
+        body: `تم استلام إيصال الدفع لطلب ${order.products?.name || 'المنتج'}. جاري مراجعة الطلب.`,
+        payload: { order_id },
+      });
+
+    // Add audit log
+    await supabase
+      .from('audit_logs')
+      .insert({
+        actor_id: userId,
+        action: 'upload_receipt',
+        target_type: 'order',
+        target_id: order_id,
+        meta: { receipt_path: uploadData.path },
+      });
+
     return new Response(
       JSON.stringify({ success: true, path: uploadData.path }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

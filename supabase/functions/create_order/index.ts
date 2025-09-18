@@ -76,6 +76,17 @@ Deno.serve(async (req) => {
 
     if (orderError) throw orderError;
 
+    // Add audit log
+    await supabase
+      .from('audit_logs')
+      .insert({
+        actor_id: userId,
+        action: 'create_order',
+        target_type: 'order',
+        target_id: order.id,
+        meta: { product_id, payment_method, payment_number },
+      });
+
     return new Response(
       JSON.stringify({ order_id: order.id }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

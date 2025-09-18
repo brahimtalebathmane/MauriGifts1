@@ -53,7 +53,9 @@
     "order_submitted": "تم إرسال الطلب بنجاح",
     "under_review": "تجري مراجعة الطلب من طرف إدارة التطبيق.",
     "required": "مطلوب",
-    "image_required": "صورة الإيصال مطلوبة"
+    "image_required": "صورة الإيصال مطلوبة",
+    "invalid_session": "جلسة غير صالحة، يرجى تسجيل الدخول مرة أخرى",
+    "product_unavailable": "هذا المنتج غير متوفر حالياً"
   },
   "payment_methods": {
     "bankily": "بنكيلي",

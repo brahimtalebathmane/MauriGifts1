@@ -26,7 +26,6 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
   const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
-
     setLoading(true);
     
     try {
@@ -64,7 +63,6 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
   };
 
   const takePhoto = async () => {
-
     setLoading(true);
     
     try {
