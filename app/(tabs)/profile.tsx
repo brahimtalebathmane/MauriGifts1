@@ -42,6 +42,13 @@ export default function ProfileScreen() {
           onPress: async () => {
             await logout();
             router.replace('/');
+          },
+        },
+      ]
+    );
+  };
+
+  const handleSave = () => {
     // In a real app, you would update the user's name via API
     showSuccessToast(t('profile.saved'));
     setEditing(false);
