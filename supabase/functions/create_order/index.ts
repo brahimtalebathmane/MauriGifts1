@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
         product_id,
         payment_method,
         payment_number,
-        status: 'awaiting_payment'
+        status: 'under_review'
       })
       .select()
       .single();

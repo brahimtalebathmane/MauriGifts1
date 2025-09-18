@@ -82,8 +82,7 @@ Deno.serve(async (req) => {
     const { error: updateError } = await supabase
       .from('orders')
       .update({ 
-        receipt_path: uploadData.path,
-        status: 'under_review'
+        receipt_path: uploadData.path
       })
       .eq('id', order_id);
 

@@ -55,7 +55,8 @@
     "required": "مطلوب",
     "image_required": "صورة الإيصال مطلوبة",
     "invalid_session": "جلسة غير صالحة، يرجى تسجيل الدخول مرة أخرى",
-    "product_unavailable": "هذا المنتج غير متوفر حالياً"
+    "product_unavailable": "هذا المنتج غير متوفر حالياً",
+    "order_under_review": "تم إرسال طلبك بنجاح وهو الآن قيد المراجعة من قبل الإدارة"
   },
   "payment_methods": {
     "bankily": "بنكيلي",
