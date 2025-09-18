@@ -96,12 +96,17 @@ export default function PaymentScreen() {
         paymentNumber
       );
 
-      if (orderResponse.error) {
+      if (orderResponse.error || !orderResponse.data) {
         showErrorToast(orderResponse.error);
         return;
       }
 
       const orderId = orderResponse.data?.order_id;
+      
+      if (!orderId) {
+        showErrorToast('خطأ في إنشاء الطلب');
+        return;
+      }
       
       // Upload receipt
       const uploadResponse = await api.uploadReceipt(

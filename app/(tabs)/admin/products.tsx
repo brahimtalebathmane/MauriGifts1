@@ -418,10 +418,10 @@ export default function AdminProductsScreen() {
               />
 
               <Input
-                label="عنوان المنتج (يظهر للمستخدم)"
+                label="العنوان المعروض للمستخدم"
                 value={formData.title}
                 onChangeText={(value) => setFormData(prev => ({ ...prev, title: value }))}
-                placeholder="مثال: 60 شدة"
+                placeholder="مثال: 60 شدة أو 100 جوهرة"
               />
 
               <Input
@@ -454,7 +454,7 @@ export default function AdminProductsScreen() {
                     label="العملة"
                     value={formData.currency}
                     onChangeText={(value) => setFormData(prev => ({ ...prev, currency: value }))}
-                    placeholder="UC أو Diamonds"
+                    placeholder="شدة، جوهرة، دولار"
                     containerStyle={styles.halfInput}
                   />
                 </View>
