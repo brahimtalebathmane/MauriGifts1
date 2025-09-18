@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-import { Chrome as Home, ShoppingBag, Bell, User, Users, ClipboardList, Settings } from 'lucide-react-native';
+import { Home, ShoppingBag, Bell, User, Users, ClipboardList, Settings } from 'lucide-react-native';
 import { useAppStore } from '../../state/store';
 import { useI18n } from '../../hooks/useI18n';
 
@@ -78,39 +78,38 @@ export default function TabLayout() {
         }}
       />
 
-      {isAdmin && (
-        <>
-          <Tabs.Screen
-            name="admin/users"
-            options={{
-              title: t('admin.users'),
-              tabBarIcon: ({ color, size }) => (
-                <Users size={size} color={color} />
-              ),
-            }}
-          />
+      <Tabs.Screen
+        name="admin/users"
+        options={{
+          title: t('admin.users'),
+          tabBarIcon: ({ color, size }) => (
+            <Users size={size} color={color} />
+          ),
+          href: isAdmin ? '/admin/users' : null,
+        }}
+      />
 
-          <Tabs.Screen
-            name="admin/orders"
-            options={{
-              title: t('admin.orders'),
-              tabBarIcon: ({ color, size }) => (
-                <ClipboardList size={size} color={color} />
-              ),
-            }}
-          />
+      <Tabs.Screen
+        name="admin/orders"
+        options={{
+          title: t('admin.orders'),
+          tabBarIcon: ({ color, size }) => (
+            <ClipboardList size={size} color={color} />
+          ),
+          href: isAdmin ? '/admin/orders' : null,
+        }}
+      />
 
-          <Tabs.Screen
-            name="admin/products"
-            options={{
-              title: 'إدارة المنتجات',
-              tabBarIcon: ({ color, size }) => (
-                <Settings size={size} color={color} />
-              ),
-            }}
-          />
-        </>
-      )}
+      <Tabs.Screen
+        name="admin/products"
+        options={{
+          title: 'إدارة المنتجات',
+          tabBarIcon: ({ color, size }) => (
+            <Settings size={size} color={color} />
+          ),
+          href: isAdmin ? '/admin/products' : null,
+        }}
+      />
     </Tabs>
   );
 }
