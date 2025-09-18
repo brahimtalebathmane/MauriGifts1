@@ -81,6 +81,15 @@ export default function PaymentScreen() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
       // Create order
       const orderResponse = await api.createOrder(
         token,
@@ -93,10 +102,13 @@ export default function PaymentScreen() {
         return;
       }
 
+      const orderId = orderResponse.data.id;
       
       if (!orderId) {
         showErrorToast('خطأ في إنشاء الطلب');
         return;
+      }
+
       // Upload receipt
       const uploadResponse = await api.uploadReceipt(
         token,
@@ -106,6 +118,7 @@ export default function PaymentScreen() {
       );
 
       if (uploadResponse.error) {
+        showErrorToast(uploadResponse.error);
         return;
       }
 
@@ -114,7 +127,7 @@ export default function PaymentScreen() {
     } catch (error) {
       console.error('Payment error:', error);
       showErrorToast(t('errors.generic'));
-      console.error('Payment error:', error);
+    } finally {
       setLoading(false);
     }
   };
