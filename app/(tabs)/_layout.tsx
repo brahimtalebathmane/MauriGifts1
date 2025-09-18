@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-import { Home, ShoppingBag, Bell, User, Users, ClipboardList, Settings } from 'lucide-react-native';
+import { Chrome as Home, ShoppingBag, Bell, User, Users, ClipboardList, Settings } from 'lucide-react-native';
 import { useAppStore } from '../../state/store';
 import { useI18n } from '../../hooks/useI18n';
 
