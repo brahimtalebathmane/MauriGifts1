@@ -11,31 +11,16 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Settings, Plus, CreditCard as Edit, Trash2, X } from 'lucide-react-native';
 import { useAppStore } from '../../../state/store';
-import { api } from '../../../lib/api';
+import { apiService as api } from '../../../src/services/api';
 import { useI18n } from '../../../hooks/useI18n';
+import { Product, Settings as SettingsType } from '../../../src/types';
+import { showSuccessToast, showErrorToast } from '../../../src/utils/toast';
+import { validatePrice } from '../../../src/utils/validation';
 import Card from '../../../components/ui/Card';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import EmptyState from '../../../components/ui/EmptyState';
 import Skeleton from '../../../components/ui/Skeleton';
-import { showSuccessToast, showErrorToast } from '../../../components/ui/Toast';
-
-interface Product {
-  id: string;
-  category: 'pubg' | 'free_fire' | 'itunes' | 'psn';
-  name: string;
-  sku: string;
-  price_mru: number;
-  active: boolean;
-  meta: any;
-  created_at: string;
-}
-
-interface Settings {
-  payment_number: string;
-  app_name: string;
-  app_version: string;
-}
 
 export default function AdminProductsScreen() {
   const { token } = useAppStore();

@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { Camera, Upload } from 'lucide-react-native';
-import { useI18n } from '../hooks/useI18n';
+import { Upload } from 'lucide-react-native';
+import { useI18n } from '../../hooks/useI18n';
 
 interface ImagePickerComponentProps {
   onImageSelected: (base64: string, extension: string) => void;
@@ -29,7 +29,6 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
     setLoading(true);
     
     try {
-      // Request permissions for non-web platforms
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         
@@ -50,8 +49,6 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
-        
-        // Always process the image to ensure consistency
         await processImage(asset.uri, asset.base64);
       }
     } catch (error) {
@@ -66,7 +63,6 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
     setLoading(true);
     
     try {
-      // Request permissions for non-web platforms
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         
@@ -86,8 +82,6 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
-        
-        // Always process the image to ensure consistency
         await processImage(asset.uri, asset.base64);
       }
     } catch (error) {
@@ -100,13 +94,11 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
 
   const processImage = async (uri: string, existingBase64?: string) => {
     try {
-      // If we already have base64, use it directly
       if (existingBase64) {
         onImageSelected(existingBase64, 'jpg');
         return;
       }
 
-      // Resize image to reduce file size
       const manipulatedImage = await ImageManipulator.manipulateAsync(
         uri,
         [{ resize: { width: 800 } }],
@@ -126,7 +118,6 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
 
   const showActionSheet = () => {
     if (Platform.OS === 'web') {
-      // On web, only show gallery option
       pickImage();
     } else {
       Alert.alert(

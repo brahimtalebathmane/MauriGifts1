@@ -11,17 +11,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowRight } from 'lucide-react-native';
 import { useAppStore } from '../../state/store';
 import { useI18n } from '../../hooks/useI18n';
+import { CATEGORY_IMAGES } from '../../src/constants';
+import { showErrorToast } from '../../src/utils/toast';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import EmptyState from '../../components/ui/EmptyState';
-import { Product } from '../../state/store';
-
-const CATEGORY_IMAGES = {
-  pubg: 'https://i.postimg.cc/cLvssbLj/OIP-2.webp',
-  free_fire: 'https://i.postimg.cc/C52QJmpB/OIP-3.webp',
-  itunes: 'https://i.postimg.cc/QMqYvXrr/R.jpg',
-  psn: 'https://i.postimg.cc/bJW59mhG/OIP-4.webp',
-};
+import { Product } from '../../src/types';
+import { formatPrice } from '../../src/utils/formatters';
 
 export default function CategoryScreen() {
   const { id } = useLocalSearchParams();

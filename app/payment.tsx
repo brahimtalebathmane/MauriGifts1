@@ -11,22 +11,14 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowRight } from 'lucide-react-native';
 import { useAppStore } from '../state/store';
-import { api } from '../lib/api';
+import { apiService as api } from '../src/services/api';
 import { useI18n } from '../hooks/useI18n';
+import { PAYMENT_METHODS } from '../src/constants';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
-import ImagePickerComponent from '../components/ImagePicker';
-import { showSuccessToast, showErrorToast } from '../components/ui/Toast';
-
-const PAYMENT_METHODS = {
-  bankily: { name: 'بنكيلي', logo: 'https://i.postimg.cc/0ywf19DB/1200x630wa.png' },
-  sidad: { name: 'السداد', logo: 'https://i.postimg.cc/t4Whm2H0/OIP.webp' },
-  bimbank: { name: 'بيم بنك', logo: 'https://i.postimg.cc/7YT7fmhC/OIP-1.webp' },
-  masrvi: { name: 'مصرفي', logo: 'https://i.postimg.cc/HL38fNZN/Masrvi-bank-logo.png' },
-  amanati: { name: 'أمانتي', logo: 'https://i.postimg.cc/xdsyKq2q/464788970-541170771978227-7444745331945134149-n.jpg' },
-  klik: { name: 'كليك', logo: 'https://i.postimg.cc/5NwBssVh/unnamed.png' },
-};
+import ImagePickerComponent from '../src/components/forms/ImagePicker';
+import { showSuccessToast, showErrorToast } from '../src/utils/toast';
 
 export default function PaymentScreen() {
   const { productId, productName, productPrice } = useLocalSearchParams();

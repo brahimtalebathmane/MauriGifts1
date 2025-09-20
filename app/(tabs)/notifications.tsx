@@ -9,13 +9,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bell, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useAppStore } from '../../state/store';
-import { api } from '../../lib/api';
+import { apiService as api } from '../../src/services/api';
 import { useI18n } from '../../hooks/useI18n';
+import { formatDate } from '../../src/utils/formatters';
+import { showErrorToast } from '../../src/utils/toast';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import EmptyState from '../../components/ui/EmptyState';
 import Skeleton from '../../components/ui/Skeleton';
-import { showErrorToast } from '../../components/ui/Toast';
 
 export default function NotificationsScreen() {
   const { notifications, setNotifications, token } = useAppStore();

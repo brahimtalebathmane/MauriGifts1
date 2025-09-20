@@ -11,18 +11,12 @@ import {
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppStore } from '../../state/store';
-import { api } from '../../lib/api';
+import { apiService as api } from '../../src/services/api';
 import { useI18n } from '../../hooks/useI18n';
+import { CATEGORY_IMAGES } from '../../src/constants';
+import { showErrorToast } from '../../src/utils/toast';
 import Card from '../../components/ui/Card';
 import Skeleton from '../../components/ui/Skeleton';
-import { showErrorToast } from '../../components/ui/Toast';
-
-const CATEGORY_IMAGES = {
-  pubg: 'https://i.postimg.cc/cLvssbLj/OIP-2.webp',
-  free_fire: 'https://i.postimg.cc/C52QJmpB/OIP-3.webp',
-  itunes: 'https://i.postimg.cc/QMqYvXrr/R.jpg',
-  psn: 'https://i.postimg.cc/bJW59mhG/OIP-4.webp',
-};
 
 export default function HomeScreen() {
   const { products, setProducts, user } = useAppStore();

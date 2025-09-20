@@ -12,36 +12,17 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClipboardList, Eye, X } from 'lucide-react-native';
 import { useAppStore } from '../../../state/store';
-import { api } from '../../../lib/api';
+import { apiService as api } from '../../../src/services/api';
 import { useI18n } from '../../../hooks/useI18n';
+import { AdminOrder } from '../../../src/types';
+import { formatPhoneNumber } from '../../../src/utils/formatters';
+import { showSuccessToast, showErrorToast } from '../../../src/utils/toast';
 import Card from '../../../components/ui/Card';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import EmptyState from '../../../components/ui/EmptyState';
-import StatusChip from '../../../components/StatusChip';
+import StatusChip from '../../../src/components/common/StatusChip';
 import Skeleton from '../../../components/ui/Skeleton';
-import { showSuccessToast, showErrorToast } from '../../../components/ui/Toast';
-
-interface AdminOrder {
-  id: string;
-  status: 'awaiting_payment' | 'under_review' | 'completed' | 'rejected';
-  payment_method: string;
-  payment_number: string;
-  receipt_path?: string;
-  admin_note?: string;
-  delivery_code?: string;
-  created_at: string;
-  users: {
-    id: string;
-    name: string;
-    phone_number: string;
-  };
-  products: {
-    id: string;
-    name: string;
-    price_mru: number;
-  };
-}
 
 export default function AdminOrdersScreen() {
   const { token } = useAppStore();

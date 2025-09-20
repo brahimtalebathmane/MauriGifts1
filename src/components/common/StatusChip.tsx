@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useI18n } from '../hooks/useI18n';
+import { useI18n } from '../../hooks/useI18n';
+import { OrderStatus } from '../../types';
 
 interface StatusChipProps {
-  status: 'awaiting_payment' | 'under_review' | 'completed' | 'rejected';
+  status: OrderStatus;
 }
 
 const StatusChip: React.FC<StatusChipProps> = ({ status }) => {

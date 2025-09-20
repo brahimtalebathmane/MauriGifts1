@@ -10,12 +10,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAppStore } from '../../state/store';
-import { api } from '../../lib/api';
+import { apiService as api } from '../../src/services/api';
 import { useI18n } from '../../hooks/useI18n';
+import { validatePhoneNumber, validatePin, validateName } from '../../src/utils/validation';
+import { showErrorToast } from '../../src/utils/toast';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { showErrorToast } from '../../components/ui/Toast';
 
 export default function SignUpScreen() {
   const { setAuth } = useAppStore();

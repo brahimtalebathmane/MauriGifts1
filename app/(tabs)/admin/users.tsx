@@ -9,21 +9,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Users, User } from 'lucide-react-native';
 import { useAppStore } from '../../../state/store';
-import { api } from '../../../lib/api';
+import { apiService as api } from '../../../src/services/api';
 import { useI18n } from '../../../hooks/useI18n';
+import { UserData } from '../../../src/types';
+import { formatPhoneNumber } from '../../../src/utils/formatters';
+import { showErrorToast } from '../../../src/utils/toast';
 import Card from '../../../components/ui/Card';
 import EmptyState from '../../../components/ui/EmptyState';
 import Skeleton from '../../../components/ui/Skeleton';
-import { showErrorToast } from '../../../components/ui/Toast';
-
-interface UserData {
-  id: string;
-  name: string;
-  phone_number: string;
-  role: string;
-  created_at: string;
-  order_count: number;
-}
 
 export default function AdminUsersScreen() {
   const { token } = useAppStore();
