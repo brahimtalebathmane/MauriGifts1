@@ -9,15 +9,15 @@ import {
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowRight } from 'lucide-react-native';
-import { useAppStore } from '../../state/store';
-import { useI18n } from '../../hooks/useI18n';
-import { CATEGORY_IMAGES } from '../../src/constants';
-import { showErrorToast } from '../../src/utils/toast';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import EmptyState from '../../components/ui/EmptyState';
-import { Product } from '../../src/types';
-import { formatPrice } from '../../src/utils/formatters';
+import { useAppStore } from '@/state/store';
+import { useI18n } from '@/hooks/useI18n';
+import { CATEGORY_IMAGES } from '@/src/constants';
+import { showErrorToast } from '@/src/utils/toast';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
+import { Product } from '@/src/types';
+import { formatPrice } from '@/src/utils/formatters';
 
 export default function CategoryScreen() {
   const { id } = useLocalSearchParams();

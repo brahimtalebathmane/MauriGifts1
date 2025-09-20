@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { storage } from '../src/utils/storage';
-import { User, Product, Order, Notification } from '../src/types';
+import { storage } from '@/src/utils/storage';
+import { User, Product, Order, Notification } from '@/src/types';
 
 interface AppState {
   // Auth

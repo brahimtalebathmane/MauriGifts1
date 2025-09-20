@@ -10,15 +10,15 @@ import {
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowRight } from 'lucide-react-native';
-import { useAppStore } from '../state/store';
-import { apiService as api } from '../src/services/api';
-import { useI18n } from '../hooks/useI18n';
-import { PAYMENT_METHODS } from '../src/constants';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
-import ImagePickerComponent from '../src/components/forms/ImagePicker';
-import { showSuccessToast, showErrorToast } from '../src/utils/toast';
+import { useAppStore } from '@/state/store';
+import { apiService as api } from '@/src/services/api';
+import { useI18n } from '@/hooks/useI18n';
+import { PAYMENT_METHODS } from '@/src/constants';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import ImagePickerComponent from '@/src/components/forms/ImagePicker';
+import { showSuccessToast, showErrorToast } from '@/src/utils/toast';
 
 export default function PaymentScreen() {
   const { productId, productName, productPrice } = useLocalSearchParams();

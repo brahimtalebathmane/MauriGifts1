@@ -3,7 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import Toast from 'react-native-toast-message';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
-import { useAppStore } from '../state/store';
+import { useAppStore } from '@/state/store';
 
 export default function RootLayout() {
   useFrameworkReady();

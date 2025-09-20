@@ -10,13 +10,13 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAppStore } from '../../state/store';
-import { apiService as api } from '../../src/services/api';
-import { useI18n } from '../../hooks/useI18n';
-import { CATEGORY_IMAGES } from '../../src/constants';
-import { showErrorToast } from '../../src/utils/toast';
-import Card from '../../components/ui/Card';
-import Skeleton from '../../components/ui/Skeleton';
+import { useAppStore } from '@/state/store';
+import { apiService as api } from '@/src/services/api';
+import { useI18n } from '@/hooks/useI18n';
+import { CATEGORY_IMAGES } from '@/src/constants';
+import { showErrorToast } from '@/src/utils/toast';
+import Card from '@/components/ui/Card';
+import Skeleton from '@/components/ui/Skeleton';
 
 export default function HomeScreen() {
   const { products, setProducts, user } = useAppStore();

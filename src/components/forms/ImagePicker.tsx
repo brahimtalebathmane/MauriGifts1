@@ -11,7 +11,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Upload } from 'lucide-react-native';
-import { useI18n } from '../../hooks/useI18n';
+import { useI18n } from '@/hooks/useI18n';
 
 interface ImagePickerComponentProps {
   onImageSelected: (base64: string, extension: string) => void;

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
-import { useAppStore } from '../state/store';
+import { useAppStore } from '@/state/store';
 
 export default function IndexScreen() {
   const { user, token, isLoading } = useAppStore();
