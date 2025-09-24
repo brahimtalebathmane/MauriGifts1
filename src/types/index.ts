@@ -71,6 +71,31 @@ export interface Settings {
   app_version: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  image_url?: string;
+  created_at: string;
+}
+
+export interface PaymentMethodDB {
+  id: string;
+  name: string;
+  logo_url?: string;
+  status: 'active' | 'inactive';
+  created_at: string;
+}
+
+export interface ProductGuide {
+  id: string;
+  product_id: string;
+  step_number: number;
+  image_url?: string;
+  description?: string;
+  support_link?: string;
+  created_at: string;
+}
+
 export type PaymentMethod = 'bankily' | 'sidad' | 'masrvi' | 'bimbank' | 'amanati' | 'klik';
 export type ProductCategory = 'pubg' | 'free_fire' | 'itunes' | 'psn';
 export type OrderStatus = 'awaiting_payment' | 'under_review' | 'completed' | 'rejected';

@@ -212,6 +212,65 @@ class ApiClient {
       }),
     });
   }
+
+  // Admin categories management
+  async adminManageCategories(
+    token: string,
+    action: 'list' | 'create' | 'update' | 'delete',
+    category?: any
+  ) {
+    return this.request('admin_manage_categories', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        action,
+        category,
+      }),
+    });
+  }
+
+  // Admin payment methods management
+  async adminManagePaymentMethods(
+    token: string,
+    action: 'list' | 'create' | 'update' | 'delete',
+    paymentMethod?: any
+  ) {
+    return this.request('admin_manage_payment_methods', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        action,
+        payment_method: paymentMethod,
+      }),
+    });
+  }
+
+  // Admin product guides management
+  async adminManageProductGuides(
+    token: string,
+    action: 'list' | 'create' | 'update' | 'delete',
+    guide?: any
+  ) {
+    return this.request('admin_manage_product_guides', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        action,
+        guide,
+      }),
+    });
+  }
+
+  // Get product guides for purchased products
+  async getProductGuides(token: string, productId: string) {
+    return this.request('get_product_guides', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        product_id: productId,
+      }),
+    });
+  }
 }
 
 export const apiService = new ApiClient();

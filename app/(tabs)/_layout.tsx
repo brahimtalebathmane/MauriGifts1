@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-import { Chrome as Home, ShoppingBag, Bell, User, Users, ClipboardList, Settings } from 'lucide-react-native';
+import { Chrome as Home, ShoppingBag, Bell, User, Users, ClipboardList, Settings, FolderOpen, CreditCard } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
 import { useI18n } from '@/hooks/useI18n';
 
@@ -108,6 +108,28 @@ export default function TabLayout() {
             <Settings size={size} color={color} />
           ),
           href: isAdmin ? '/admin/products' : null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="admin/categories"
+        options={{
+          title: 'الفئات',
+          tabBarIcon: ({ color, size }) => (
+            <FolderOpen size={size} color={color} />
+          ),
+          href: isAdmin ? '/admin/categories' : null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="admin/payment-methods"
+        options={{
+          title: 'طرق الدفع',
+          tabBarIcon: ({ color, size }) => (
+            <CreditCard size={size} color={color} />
+          ),
+          href: isAdmin ? '/admin/payment-methods' : null,
         }}
       />
     </Tabs>
