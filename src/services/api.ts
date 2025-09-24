@@ -271,6 +271,20 @@ class ApiClient {
       }),
     });
   }
+
+  // Get categories
+  async getCategories() {
+    return this.request('get_categories', {
+      method: 'GET',
+    });
+  }
+
+  // Get payment methods
+  async getPaymentMethods() {
+    return this.request('get_payment_methods', {
+      method: 'GET',
+    });
+  }
 }
 
 export const apiService = new ApiClient();
