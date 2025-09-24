@@ -96,11 +96,14 @@ export default function AdminCategoriesScreen() {
 
     setActionLoading(true);
     try {
-      const categoryData = {
+      const categoryData: any = {
         name: formData.name.trim(),
         image_url: formData.image_url.trim() || null,
-        ...(editingCategory && { id: editingCategory.id }),
       };
+
+      if (editingCategory) {
+        categoryData.id = editingCategory.id;
+      }
 
       const response = await api.adminManageCategories(
         token,
