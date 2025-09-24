@@ -10,11 +10,11 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { FolderOpen, Plus, Edit, Trash2, X } from 'lucide-react-native';
+import { CreditCard, Plus, Edit, Trash2 } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
 import { apiService as api } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import { Category } from '@/src/types';
+import { PaymentMethodDB } from '@/src/types';
 import { showSuccessToast, showErrorToast } from '@/src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -22,35 +22,36 @@ import Input from '@/components/ui/Input';
 import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
 
-export default function AdminCategoriesScreen() {
+export default function AdminPaymentMethodsScreen() {
   const { token } = useAppStore();
   const { t } = useI18n();
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodDB[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingMethod, setEditingMethod] = useState<PaymentMethodDB | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    image_url: '',
+    logo_url: '',
+    status: 'active' as 'active' | 'inactive',
   });
 
-  const loadCategories = async (isRefresh = false) => {
+  const loadPaymentMethods = async (isRefresh = false) => {
     if (!token) return;
     
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
 
     try {
-      const response = await api.adminManageCategories(token, 'list');
+      const response = await api.adminManagePaymentMethods(token, 'list');
       if (response.data) {
-        setCategories(response.data.categories);
+        setPaymentMethods(response.data.payment_methods);
       } else {
         showErrorToast(response.error || t('errors.generic'));
       }
     } catch (error) {
-      console.error('Error loading categories:', error);
+      console.error('Error loading payment methods:', error);
       showErrorToast(t('errors.network'));
     } finally {
       setLoading(false);
@@ -59,21 +60,23 @@ export default function AdminCategoriesScreen() {
   };
 
   useEffect(() => {
-    loadCategories();
+    loadPaymentMethods();
   }, [token]);
 
-  const openCategoryModal = (category?: Category) => {
-    if (category) {
-      setEditingCategory(category);
+  const openMethodModal = (method?: PaymentMethodDB) => {
+    if (method) {
+      setEditingMethod(method);
       setFormData({
-        name: category.name,
-        image_url: category.image_url || '',
+        name: method.name,
+        logo_url: method.logo_url || '',
+        status: method.status,
       });
     } else {
-      setEditingCategory(null);
+      setEditingMethod(null);
       setFormData({
         name: '',
-        image_url: '',
+        logo_url: '',
+        status: 'active',
       });
     }
     setModalVisible(true);
@@ -81,52 +84,54 @@ export default function AdminCategoriesScreen() {
 
   const closeModal = () => {
     setModalVisible(false);
-    setEditingCategory(null);
+    setEditingMethod(null);
     setFormData({
       name: '',
-      image_url: '',
+      logo_url: '',
+      status: 'active',
     });
   };
 
-  const handleSaveCategory = async () => {
+  const handleSaveMethod = async () => {
     if (!token || !formData.name.trim()) {
-      showErrorToast('اسم الفئة مطلوب');
+      showErrorToast('اسم طريقة الدفع مطلوب');
       return;
     }
 
     setActionLoading(true);
     try {
-      const categoryData = {
+      const methodData = {
         name: formData.name.trim(),
-        image_url: formData.image_url.trim() || null,
-        ...(editingCategory && { id: editingCategory.id }),
+        logo_url: formData.logo_url.trim() || null,
+        status: formData.status,
+        ...(editingMethod && { id: editingMethod.id }),
       };
 
-      const response = await api.adminManageCategories(
+      const response = await api.adminManagePaymentMethods(
         token,
-        editingCategory ? 'update' : 'create',
-        categoryData
+        editingMethod ? 'update' : 'create',
+        methodData
       );
 
       if (response.data) {
-        showSuccessToast(editingCategory ? 'تم تحديث الفئة' : 'تم إضافة الفئة');
+        showSuccessToast(editingMethod ? 'تم تحديث طريقة الدفع' : 'تم إضافة طريقة الدفع');
         closeModal();
-        loadCategories();
+        loadPaymentMethods();
       } else {
-        showErrorToast(response.error || 'خطأ في حفظ الفئة');
+        showErrorToast(response.error || 'خطأ في حفظ طريقة الدفع');
       }
     } catch (error) {
-      console.error('Save category error:', error);
+      console.error('Save payment method error:', error);
       showErrorToast(t('errors.network'));
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleDeleteCategory = (category: Category) => {
+  const handleDeleteMethod = (method: PaymentMethodDB) => {
     Alert.alert(
-      'حذف الفئة',
-      `هل أنت متأكد من حذف "${category.name}"؟`,
+      'حذف طريقة الدفع',
+      `هل أنت متأكد من حذف "${method.name}"؟`,
       [
         { text: 'إلغاء', style: 'cancel' },
         {
@@ -136,12 +141,12 @@ export default function AdminCategoriesScreen() {
             if (!token) return;
             
             try {
-              const response = await api.adminManageCategories(token, 'delete', { id: category.id });
+              const response = await api.adminManagePaymentMethods(token, 'delete', { id: method.id });
               if (response.data) {
-                showSuccessToast('تم حذف الفئة');
-                loadCategories();
+                showSuccessToast('تم حذف طريقة الدفع');
+                loadPaymentMethods();
               } else {
-                showErrorToast(response.error || 'خطأ في حذف الفئة');
+                showErrorToast(response.error || 'خطأ في حذف طريقة الدفع');
               }
             } catch (error) {
               showErrorToast(t('errors.network'));
@@ -152,15 +157,15 @@ export default function AdminCategoriesScreen() {
     );
   };
 
-  if (loading && categories.length === 0) {
+  if (loading && paymentMethods.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>إدارة الفئات</Text>
+          <Text style={styles.title}>إدارة طرق الدفع</Text>
         </View>
         <ScrollView style={styles.content}>
           {[1, 2, 3].map((i) => (
-            <Card key={i} style={styles.categoryCard}>
+            <Card key={i} style={styles.methodCard}>
               <Skeleton height={20} width={150} />
               <Skeleton height={16} width={120} style={styles.skeletonMargin} />
             </Card>
@@ -174,13 +179,13 @@ export default function AdminCategoriesScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Button
-          title="إضافة فئة"
+          title="إضافة طريقة دفع"
           size="small"
-          onPress={() => openCategoryModal()}
+          onPress={() => openMethodModal()}
         />
-        <Text style={styles.title}>إدارة الفئات</Text>
+        <Text style={styles.title}>إدارة طرق الدفع</Text>
         <Text style={styles.subtitle}>
-          المجموع: {categories.length} فئة
+          المجموع: {paymentMethods.length} طريقة
         </Text>
       </View>
 
@@ -189,32 +194,32 @@ export default function AdminCategoriesScreen() {
         refreshControl={
           <RefreshControl 
             refreshing={refreshing} 
-            onRefresh={() => loadCategories(true)} 
+            onRefresh={() => loadPaymentMethods(true)} 
           />
         }
       >
-        {categories.length === 0 ? (
+        {paymentMethods.length === 0 ? (
           <EmptyState
-            icon={<FolderOpen size={64} color="#9CA3AF" />}
-            title="لا توجد فئات"
-            subtitle="ابدأ بإضافة فئات جديدة"
+            icon={<CreditCard size={64} color="#9CA3AF" />}
+            title="لا توجد طرق دفع"
+            subtitle="ابدأ بإضافة طرق دفع جديدة"
             action={
               <Button
-                title="إضافة فئة"
-                onPress={() => openCategoryModal()}
+                title="إضافة طريقة دفع"
+                onPress={() => openMethodModal()}
               />
             }
           />
         ) : (
-          categories.map((category) => (
-            <Card key={category.id} style={styles.categoryCard}>
-              <View style={styles.categoryHeader}>
-                <View style={styles.categoryActions}>
+          paymentMethods.map((method) => (
+            <Card key={method.id} style={styles.methodCard}>
+              <View style={styles.methodHeader}>
+                <View style={styles.methodActions}>
                   <Button
                     title=""
                     size="small"
                     variant="outline"
-                    onPress={() => handleDeleteCategory(category)}
+                    onPress={() => handleDeleteMethod(method)}
                     style={styles.actionButton}
                   >
                     <Trash2 size={16} color="#DC2626" />
@@ -223,28 +228,39 @@ export default function AdminCategoriesScreen() {
                     title=""
                     size="small"
                     variant="outline"
-                    onPress={() => openCategoryModal(category)}
+                    onPress={() => openMethodModal(method)}
                     style={styles.actionButton}
                   >
                     <Edit size={16} color="#2563EB" />
                   </Button>
                 </View>
+                <View style={[
+                  styles.statusBadge,
+                  method.status === 'active' ? styles.activeBadge : styles.inactiveBadge
+                ]}>
+                  <Text style={[
+                    styles.statusText,
+                    method.status === 'active' ? styles.activeText : styles.inactiveText
+                  ]}>
+                    {method.status === 'active' ? 'نشط' : 'غير نشط'}
+                  </Text>
+                </View>
               </View>
 
-              {category.image_url && (
+              {method.logo_url && (
                 <Image
-                  source={{ uri: category.image_url }}
-                  style={styles.categoryImage}
-                  resizeMode="cover"
+                  source={{ uri: method.logo_url }}
+                  style={styles.methodLogo}
+                  resizeMode="contain"
                 />
               )}
 
-              <Text style={styles.categoryName}>{category.name}</Text>
+              <Text style={styles.methodName}>{method.name}</Text>
 
-              <View style={styles.categoryDetails}>
+              <View style={styles.methodDetails}>
                 <View style={styles.detailRow}>
                   <Text style={styles.detailValue}>
-                    {new Date(category.created_at).toLocaleDateString('ar-SA')}
+                    {new Date(method.created_at).toLocaleDateString('ar-SA')}
                   </Text>
                   <Text style={styles.detailLabel}>تاريخ الإنشاء:</Text>
                 </View>
@@ -254,7 +270,7 @@ export default function AdminCategoriesScreen() {
         )}
       </ScrollView>
 
-      {/* Category Modal */}
+      {/* Payment Method Modal */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -269,29 +285,42 @@ export default function AdminCategoriesScreen() {
               size="small"
             />
             <Text style={styles.modalTitle}>
-              {editingCategory ? 'تعديل الفئة' : 'إضافة فئة جديدة'}
+              {editingMethod ? 'تعديل طريقة الدفع' : 'إضافة طريقة دفع جديدة'}
             </Text>
           </View>
 
           <ScrollView style={styles.modalContent}>
             <Card style={styles.modalCard}>
               <Input
-                label="اسم الفئة"
+                label="اسم طريقة الدفع"
                 value={formData.name}
                 onChangeText={(value) => setFormData(prev => ({ ...prev, name: value }))}
-                placeholder="مثال: ألعاب الهاتف"
+                placeholder="مثال: بنكيلي"
               />
 
               <Input
-                label="رابط الصورة"
-                value={formData.image_url}
-                onChangeText={(value) => setFormData(prev => ({ ...prev, image_url: value }))}
-                placeholder="https://example.com/image.jpg"
+                label="رابط الشعار"
+                value={formData.logo_url}
+                onChangeText={(value) => setFormData(prev => ({ ...prev, logo_url: value }))}
+                placeholder="https://example.com/logo.png"
               />
 
+              <View style={styles.switchRow}>
+                <Button
+                  title={formData.status === 'active' ? 'نشط' : 'غير نشط'}
+                  size="small"
+                  variant={formData.status === 'active' ? 'primary' : 'outline'}
+                  onPress={() => setFormData(prev => ({ 
+                    ...prev, 
+                    status: prev.status === 'active' ? 'inactive' : 'active' 
+                  }))}
+                />
+                <Text style={styles.switchLabel}>حالة طريقة الدفع:</Text>
+              </View>
+
               <Button
-                title={editingCategory ? 'تحديث الفئة' : 'إضافة الفئة'}
-                onPress={handleSaveCategory}
+                title={editingMethod ? 'تحديث طريقة الدفع' : 'إضافة طريقة الدفع'}
+                onPress={handleSaveMethod}
                 loading={actionLoading}
                 disabled={!formData.name.trim()}
                 style={styles.saveButton}
@@ -331,16 +360,16 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  categoryCard: {
+  methodCard: {
     marginBottom: 12,
   },
-  categoryHeader: {
+  methodHeader: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
   },
-  categoryActions: {
+  methodActions: {
     flexDirection: 'row',
     gap: 8,
   },
@@ -350,20 +379,40 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingHorizontal: 0,
   },
-  categoryImage: {
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  activeBadge: {
+    backgroundColor: '#D1FAE5',
+  },
+  inactiveBadge: {
+    backgroundColor: '#FEE2E2',
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  activeText: {
+    color: '#065F46',
+  },
+  inactiveText: {
+    color: '#991B1B',
+  },
+  methodLogo: {
     width: '100%',
-    height: 120,
-    borderRadius: 8,
+    height: 80,
     marginBottom: 12,
   },
-  categoryName: {
+  methodName: {
     fontSize: 18,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 12,
     textAlign: 'right',
   },
-  categoryDetails: {
+  methodDetails: {
     gap: 8,
   },
   detailRow: {
@@ -407,6 +456,17 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     marginBottom: 16,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  switchLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
   },
   saveButton: {
     marginTop: 16,
