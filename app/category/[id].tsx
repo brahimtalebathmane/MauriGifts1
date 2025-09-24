@@ -11,21 +11,37 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowRight } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
 import { useI18n } from '@/hooks/useI18n';
-import { CATEGORY_IMAGES } from '@/src/constants';
+import { Category } from '@/src/types';
 import { showErrorToast } from '@/src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
 import { Product } from '@/src/types';
-import { formatPrice } from '@/src/utils/formatters';
+import { apiService as api } from '@/src/services/api';
 
 export default function CategoryScreen() {
   const { id } = useLocalSearchParams();
   const { products } = useAppStore();
   const { t } = useI18n();
+  const [category, setCategory] = React.useState<Category | null>(null);
   
   const categoryProducts = products[id as string] || [];
-  const categoryImage = CATEGORY_IMAGES[id as keyof typeof CATEGORY_IMAGES];
+
+  React.useEffect(() => {
+    const loadCategory = async () => {
+      try {
+        const response = await api.getCategories();
+        if (response.data) {
+          const foundCategory = response.data.categories.find((cat: Category) => cat.name === id);
+          setCategory(foundCategory || null);
+        }
+      } catch (error) {
+        console.error('Error loading category:', error);
+      }
+    };
+    
+    loadCategory();
+  }, [id]);
 
   const handleProductSelect = (product: Product) => {
     if (!product.active) {
@@ -78,9 +94,9 @@ export default function CategoryScreen() {
       </View>
 
       <ScrollView style={styles.content}>
-        {categoryImage && (
+        {category?.image_url && (
           <Image
-            source={{ uri: categoryImage }}
+            source={{ uri: category.image_url }}
             style={styles.categoryImage}
             resizeMode="cover"
           />

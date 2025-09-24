@@ -13,7 +13,7 @@ import { ArrowRight } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
 import { apiService as api } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import { PAYMENT_METHODS } from '@/src/constants';
+import { PaymentMethodDB } from '@/src/types';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -32,11 +32,19 @@ export default function PaymentScreen() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [paymentPhoneNumber, setPaymentPhoneNumber] = useState('41791082');
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodDB[]>([]);
 
   useEffect(() => {
-    // Load payment number from settings
-    const loadPaymentNumber = async () => {
+    // Load payment methods and settings
+    const loadData = async () => {
       try {
+        // Load payment methods
+        const methodsResponse = await api.getPaymentMethods();
+        if (methodsResponse.data) {
+          setPaymentMethods(methodsResponse.data.payment_methods || []);
+        }
+
+        // Load payment number from settings
         if (token) {
           const response = await api.adminManageSettings(token, 'get');
           if (response.data?.settings?.payment_number) {
@@ -49,9 +57,7 @@ export default function PaymentScreen() {
       }
     };
     
-    if (token) {
-      loadPaymentNumber();
-    }
+    loadData();
   }, [token]);
 
   const validateForm = () => {
@@ -176,17 +182,17 @@ export default function PaymentScreen() {
           <Text style={styles.sectionTitle}>{t('payment.select_method')}</Text>
           
           <View style={styles.methodGrid}>
-            {Object.entries(PAYMENT_METHODS).map(([key, method]) => (
+            {paymentMethods.map((method) => (
               <Card
-                key={key}
+                key={method.id}
                 style={[
                   styles.methodOption,
-                  selectedMethod === key && styles.selectedMethod
+                  selectedMethod === method.id && styles.selectedMethod
                 ]}
-                onPress={() => setSelectedMethod(key)}
+                onPress={() => setSelectedMethod(method.id)}
               >
                 <Image
-                  source={{ uri: method.logo }}
+                  source={{ uri: method.logo_url || '' }}
                   style={styles.methodLogo}
                   resizeMode="contain"
                 />

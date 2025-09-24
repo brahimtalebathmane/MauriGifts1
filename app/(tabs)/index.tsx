@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppStore } from '@/state/store';
 import { apiService as api } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import { CATEGORY_IMAGES } from '@/src/constants';
+import { Category } from '@/src/types';
 import { showErrorToast } from '@/src/utils/toast';
 import Card from '@/components/ui/Card';
 import Skeleton from '@/components/ui/Skeleton';
@@ -23,17 +23,28 @@ export default function HomeScreen() {
   const { t } = useI18n();
   const [loading, setLoading] = React.useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
+  const [categories, setCategories] = React.useState<Category[]>([]);
 
   const loadProducts = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
 
     try {
-      const response = await api.getProducts();
-      if (response.data) {
-        setProducts(response.data.products);
-      } else {
-        showErrorToast(response.error || t('errors.generic'));
+      const [productsResponse, categoriesResponse] = await Promise.all([
+        api.getProducts(),
+        api.getCategories()
+      ]);
+      
+      if (productsResponse.data) {
+        setProducts(productsResponse.data.products);
+      }
+      
+      if (categoriesResponse.data) {
+        setCategories(categoriesResponse.data.categories || []);
+      }
+      
+      if (productsResponse.error) {
+        showErrorToast(productsResponse.error || t('errors.generic'));
       }
     } catch (error) {
       console.error('Error loading products:', error);
@@ -96,23 +107,23 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>{t('home.categories')}</Text>
         
         <View style={styles.grid}>
-          {Object.entries(CATEGORY_IMAGES).map(([category, imageUrl]) => (
+          {categories.map((category) => (
             <Card
-              key={category}
+              key={category.id}
               style={styles.categoryCard}
-              onPress={() => handleCategoryPress(category)}
+              onPress={() => handleCategoryPress(category.name)}
             >
               <Image
-                source={{ uri: imageUrl }}
+                source={{ uri: category.image_url || 'https://via.placeholder.com/300x200' }}
                 style={styles.categoryImage}
                 resizeMode="cover"
               />
               <View style={styles.cardContent}>
                 <Text style={styles.categoryTitle}>
-                  {t(`categories.${category}`)}
+                  {category.name}
                 </Text>
                 <Text style={styles.productCount}>
-                  {products[category]?.length || 0} منتج
+                  {products[category.name]?.length || 0} منتج
                 </Text>
               </View>
             </Card>

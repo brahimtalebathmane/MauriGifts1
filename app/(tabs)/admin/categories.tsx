@@ -43,9 +43,9 @@ export default function AdminCategoriesScreen() {
     else setLoading(true);
 
     try {
-      const response = await api.adminManageCategories(token, 'list');
+      const response = await api.getCategories();
       if (response.data) {
-        setCategories(response.data.categories);
+        setCategories(response.data.categories || []);
       } else {
         showErrorToast(response.error || t('errors.generic'));
       }
