@@ -102,6 +102,7 @@ export default function AdminCategoriesScreen() {
         ...(editingCategory && { id: editingCategory.id }),
       };
 
+      const response = await api.adminManageCategories(
         token,
         editingCategory ? 'update' : 'create',
         categoryData
