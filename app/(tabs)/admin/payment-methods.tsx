@@ -10,7 +10,7 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CreditCard, Plus, Edit, Trash2 } from 'lucide-react-native';
+import { CreditCard, Plus, CreditCard as Edit, Trash2 } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
 import { apiService as api } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
