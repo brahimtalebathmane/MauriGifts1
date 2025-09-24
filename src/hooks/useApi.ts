@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { apiService } from '@/src/services/api';
 import { showErrorToast } from '@/src/utils/toast';
 
 interface UseApiOptions {

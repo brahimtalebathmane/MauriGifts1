@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useAppStore } from '@/state/store';
 import { apiService } from '@/src/services/api';
 import { showErrorToast, showSuccessToast } from '@/src/utils/toast';
-import { ROUTES } from '@/src/config/constants';
+import { ROUTES } from '@/src/config/app';
 
 export const useAuth = () => {
   const { setAuth, logout: storeLogout, user, token, isLoading } = useAppStore();
@@ -14,7 +14,7 @@ export const useAuth = () => {
       
       if (response.data) {
         setAuth(response.data.user, response.data.token);
-        router.replace(ROUTES.MAIN.HOME);
+        router.replace(ROUTES.main.home);
         return { success: true };
       } else {
         showErrorToast(response.error || 'خطأ في تسجيل الدخول');
@@ -33,7 +33,7 @@ export const useAuth = () => {
       
       if (response.data) {
         setAuth(response.data.user, response.data.token);
-        router.replace(ROUTES.MAIN.HOME);
+        router.replace(ROUTES.main.home);
         return { success: true };
       } else {
         showErrorToast(response.error || 'خطأ في إنشاء الحساب');
@@ -49,7 +49,7 @@ export const useAuth = () => {
   const logout = useCallback(async () => {
     try {
       await storeLogout();
-      router.replace(ROUTES.AUTH.LOGIN);
+      router.replace(ROUTES.auth.login);
       showSuccessToast('تم تسجيل الخروج بنجاح');
     } catch (error) {
       console.error('Logout error:', error);
