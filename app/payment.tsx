@@ -35,16 +35,13 @@ export default function PaymentScreen() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodDB[]>([]);
 
   useEffect(() => {
-    // Load payment methods and settings
     const loadData = async () => {
       try {
-        // Load payment methods
         const methodsResponse = await api.getPaymentMethods();
         if (methodsResponse.data) {
           setPaymentMethods(methodsResponse.data.payment_methods || []);
         }
 
-        // Load payment number from settings
         if (token) {
           const response = await api.adminManageSettings(token, 'get');
           if (response.data?.settings?.payment_number) {
@@ -52,7 +49,6 @@ export default function PaymentScreen() {
           }
         }
       } catch (error) {
-        // Use default if can't load
         console.log('Using default payment number');
       }
     };
@@ -184,12 +180,12 @@ export default function PaymentScreen() {
           <View style={styles.methodGrid}>
             {paymentMethods.map((method) => (
               <Card
-                key={method.id}
+                key={method.id || method.name}
                 style={[
                   styles.methodOption,
-                  selectedMethod === method.id && styles.selectedMethod
+                  selectedMethod === (method.id || method.name) && styles.selectedMethod
                 ]}
-                onPress={() => setSelectedMethod(method.id)}
+                onPress={() => setSelectedMethod(method.id || method.name)}
               >
                 <Image
                   source={{ uri: method.logo_url || '' }}

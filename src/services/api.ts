@@ -274,15 +274,28 @@ class ApiClient {
 
   // Get categories
   async getCategories() {
-    return this.request('get_categories', {
-      method: 'GET',
+    return this.request('list_categories', {
+      method: 'POST',
+      body: JSON.stringify({}),
     });
   }
 
   // Get payment methods
   async getPaymentMethods() {
-    return this.request('get_payment_methods', {
-      method: 'GET',
+    return this.request('list_payment_methods', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  }
+
+  // Get product guides for purchased products
+  async getProductGuides(token: string, productId: string) {
+    return this.request('get_product_guides', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        product_id: productId,
+      }),
     });
   }
 }

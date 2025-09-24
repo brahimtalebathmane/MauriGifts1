@@ -75,7 +75,7 @@ export interface Category {
   id: string;
   name: string;
   image_url?: string;
-  created_at: string;
+  created_at?: string;
 }
 
 export interface PaymentMethodDB {
@@ -83,7 +83,7 @@ export interface PaymentMethodDB {
   name: string;
   logo_url?: string;
   status: 'active' | 'inactive';
-  created_at: string;
+  created_at?: string;
 }
 
 export interface ProductGuide {

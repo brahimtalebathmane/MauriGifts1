@@ -44,7 +44,7 @@ export default function AdminPaymentMethodsScreen() {
     else setLoading(true);
 
     try {
-      const response = await api.getPaymentMethods();
+      const response = await api.adminManagePaymentMethods(token, 'list');
       if (response.data) {
         setPaymentMethods(response.data.payment_methods || []);
       } else {

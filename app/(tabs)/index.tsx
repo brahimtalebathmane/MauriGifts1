@@ -32,7 +32,7 @@ export default function HomeScreen() {
     try {
       const [productsResponse, categoriesResponse] = await Promise.all([
         api.getProducts(),
-        api.getCategories()
+        api.getCategories(),
       ]);
       
       if (productsResponse.data) {
@@ -109,7 +109,7 @@ export default function HomeScreen() {
         <View style={styles.grid}>
           {categories.map((category) => (
             <Card
-              key={category.id}
+              key={category.id || category.name}
               style={styles.categoryCard}
               onPress={() => handleCategoryPress(category.name)}
             >
