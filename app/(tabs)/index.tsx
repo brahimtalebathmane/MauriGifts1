@@ -57,14 +57,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     loadProducts();
-    
-    // Set up periodic refresh to catch any missed updates
-    const interval = setInterval(() => {
-      refreshData();
-    }, 30000); // Refresh every 30 seconds
-    
-    return () => clearInterval(interval);
-  }, [refreshData]);
+  }, []);
 
   const handleCategoryPress = (categoryName: string) => {
     const categoryProducts = products[categoryName];
