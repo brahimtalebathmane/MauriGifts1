@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useI18n } from '@/hooks/useI18n';
-import type { OrderStatus } from '@/src/types';
-import { ORDER_STATUS_COLORS } from '@/src/constants';
+import { useI18n } from '../../../hooks/useI18n';
+import type { OrderStatus } from '../../types';
+import { ORDER_STATUS_COLORS } from '../../constants';
 
 interface StatusChipProps {
   status: OrderStatus;

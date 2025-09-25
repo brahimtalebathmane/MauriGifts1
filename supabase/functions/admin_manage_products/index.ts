@@ -81,10 +81,26 @@ Deno.serve(async (req) => {
       case 'create': {
         if (!product) throw new Error('بيانات المنتج مطلوبة');
         
+        // Validate required fields
+        if (!product.name || !product.sku || !product.price_mru) {
+          throw new Error('الاسم ورمز المنتج والسعر مطلوبة');
+        }
+        
+        // Ensure category_id is provided
+        if (!product.category_id) {
+          throw new Error('يجب اختيار فئة للمنتج');
+        }
+        
         const { data: newProduct, error } = await supabase
           .from('products')
           .insert(product)
-          .select()
+          .select(`
+            *,
+            categories (
+              id,
+              name
+            )
+          `)
           .single();
 
         if (error) throw error;
@@ -114,7 +130,13 @@ Deno.serve(async (req) => {
           .from('products')
           .update(updateData)
           .eq('id', id)
-          .select()
+          .select(`
+            *,
+            categories (
+              id,
+              name
+            )
+          `)
           .single();
 
         if (error) throw error;

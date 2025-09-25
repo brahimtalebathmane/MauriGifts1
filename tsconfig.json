@@ -4,7 +4,6 @@
     "strict": true,
     "paths": {
       "@/*": ["./*"],
-      "@/src/*": ["src/*"],
       "@/components/*": ["./components/*"],
       "@/hooks/*": ["./hooks/*"],
       "@/state/*": ["./state/*"],

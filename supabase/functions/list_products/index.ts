@@ -33,13 +33,24 @@ Deno.serve(async (req) => {
 
     if (error) throw error;
 
-    // Group products by category name for backward compatibility
+    // Group products by category name and ID for proper linking
     const groupedProducts = products.reduce((acc: any, product: any) => {
       const categoryName = product.categories?.name || 'uncategorized';
+      const categoryId = product.categories?.id || 'uncategorized';
+      
+      // Group by both name and ID for backward compatibility
       if (!acc[categoryName]) {
         acc[categoryName] = [];
       }
+      if (!acc[categoryId]) {
+        acc[categoryId] = [];
+      }
+      
       acc[categoryName].push(product);
+      if (categoryId !== categoryName) {
+        acc[categoryId].push(product);
+      }
+      
       return acc;
     }, {});
 

@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppStore } from '@/state/store';
 import { apiService } from '../../src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import type { Category } from '@/src/types';
+import type { Category } from '../../src/types';
 import { showErrorToast } from '../../src/utils/toast';
 import Card from '@/components/ui/Card';
 import Skeleton from '@/components/ui/Skeleton';

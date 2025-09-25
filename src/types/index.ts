@@ -7,15 +7,23 @@ export interface User {
   updated_at: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  image_url?: string;
+  created_at: string;
+}
+
 export interface Product {
   id: string;
-  category: ProductCategory;
+  category_id?: string;
   name: string;
   sku: string;
   price_mru: number;
   active: boolean;
   meta: ProductMeta;
   created_at: string;
+  categories?: Category;
 }
 
 export interface ProductMeta {
@@ -81,13 +89,6 @@ export interface AppSettings {
   payment_number: string;
   app_name: string;
   app_version: string;
-}
-
-export interface Category {
-  id: string;
-  name: string;
-  image_url?: string;
-  created_at: string;
 }
 
 export interface PaymentMethodDB {

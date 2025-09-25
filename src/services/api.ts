@@ -1,5 +1,5 @@
-import { API_CONFIG } from '@/src/config';
-import type { ApiResponse } from '@/src/types';
+import { API_CONFIG } from '../config';
+import type { ApiResponse } from '../types';
 
 class ApiClient {
   private async request<T>(
@@ -59,10 +59,17 @@ class ApiClient {
     });
   }
 
-  // Products
+  // Products and Categories
   async getProducts() {
     return this.request('list_products', {
       method: 'GET',
+    });
+  }
+
+  async getCategories() {
+    return this.request('list_categories', {
+      method: 'POST',
+      body: JSON.stringify({}),
     });
   }
 
@@ -192,31 +199,6 @@ class ApiClient {
     });
   }
 
-  async adminGetCategories(token: string) {
-    return this.request('admin_manage_categories', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        action: 'list',
-      }),
-    });
-  }
-
-  async adminManageSettings(
-    token: string,
-    action: 'get' | 'update',
-    settings?: Record<string, any>
-  ) {
-    return this.request('admin_manage_settings', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        action,
-        settings,
-      }),
-    });
-  }
-
   async adminManageCategories(
     token: string,
     action: 'list' | 'create' | 'update' | 'delete',
@@ -247,26 +229,18 @@ class ApiClient {
     });
   }
 
-  async adminManageProductGuides(
+  async adminManageSettings(
     token: string,
-    action: 'list' | 'create' | 'update' | 'delete',
-    guide?: any
+    action: 'get' | 'update',
+    settings?: Record<string, any>
   ) {
-    return this.request('admin_manage_product_guides', {
+    return this.request('admin_manage_settings', {
       method: 'POST',
       body: JSON.stringify({
         token,
         action,
-        guide,
+        settings,
       }),
-    });
-  }
-
-  // Public endpoints
-  async getCategories() {
-    return this.request('list_categories', {
-      method: 'POST',
-      body: JSON.stringify({}),
     });
   }
 

@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowRight } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
 import { useI18n } from '@/hooks/useI18n';
-import type { Category, Product } from '@/src/types';
+import type { Category, Product } from '../../src/types';
 import { showErrorToast } from '../../src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
