@@ -82,13 +82,19 @@ Deno.serve(async (req) => {
         if (!product) throw new Error('بيانات المنتج مطلوبة');
         
         // Validate required fields
-        if (!product.name || !product.sku || !product.price_mru) {
-          throw new Error('الاسم ورمز المنتج والسعر مطلوبة');
+        if (!product.name || !product.sku || !product.price_mru || !product.category_id) {
+          throw new Error('الاسم ورمز المنتج والسعر والفئة مطلوبة');
         }
         
-        // Ensure category_id is provided
-        if (!product.category_id) {
-          throw new Error('يجب اختيار فئة للمنتج');
+        // Verify category exists
+        const { data: categoryExists, error: categoryError } = await supabase
+          .from('categories')
+          .select('id')
+          .eq('id', product.category_id)
+          .single();
+
+        if (categoryError || !categoryExists) {
+          throw new Error('الفئة المحددة غير موجودة');
         }
         
         const { data: newProduct, error } = await supabase
@@ -124,6 +130,19 @@ Deno.serve(async (req) => {
 
       case 'update': {
         if (!product?.id) throw new Error('معرف المنتج مطلوب');
+        
+        // If category_id is being updated, verify it exists
+        if (product.category_id) {
+          const { data: categoryExists, error: categoryError } = await supabase
+            .from('categories')
+            .select('id')
+            .eq('id', product.category_id)
+            .single();
+
+          if (categoryError || !categoryExists) {
+            throw new Error('الفئة المحددة غير موجودة');
+          }
+        }
         
         const { id, ...updateData } = product;
         const { data: updatedProduct, error } = await supabase

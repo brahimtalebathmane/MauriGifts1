@@ -26,6 +26,7 @@ export default function AdminProductsScreen() {
   const { token } = useAppStore();
   const { t } = useI18n();
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [settings, setSettings] = useState<AppSettings>({
     payment_number: '41791082',
     app_name: 'MauriGift',
@@ -38,7 +39,7 @@ export default function AdminProductsScreen() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [formData, setFormData] = useState({
-    category: 'pubg' as const,
+    category_id: '',
     name: '',
     title: '',
     sku: '',
@@ -333,7 +334,7 @@ export default function AdminProductsScreen() {
               <View style={styles.productDetails}>
                 <View style={styles.detailRow}>
                   <Text style={styles.detailValue}>
-                    {categories.find(cat => cat.id === product.category_id)?.name || 'غير محدد'}
+                    {product.categories?.name || 'غير محدد'}
                   </Text>
                   <Text style={styles.detailLabel}>الفئة:</Text>
                 </View>
