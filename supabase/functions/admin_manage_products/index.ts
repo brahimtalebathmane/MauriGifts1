@@ -12,7 +12,7 @@ const manageProductsSchema = z.object({
   action: z.enum(['list', 'create', 'update', 'delete']),
   product: z.object({
     id: z.string().uuid().optional(),
-    category: z.enum(['pubg', 'free_fire', 'itunes', 'psn']).optional(),
+    category_id: z.string().uuid().optional(),
     name: z.string().min(1).optional(),
     sku: z.string().min(1).optional(),
     price_mru: z.number().positive().optional(),
@@ -61,8 +61,14 @@ Deno.serve(async (req) => {
       case 'list': {
         const { data: products, error } = await supabase
           .from('products')
-          .select('*')
-          .order('category')
+          .select(`
+            *,
+            categories (
+              id,
+              name
+            )
+          `)
+          .order('created_at', { ascending: false })
           .order('price_mru');
 
         if (error) throw error;

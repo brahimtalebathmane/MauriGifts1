@@ -31,7 +31,9 @@ export default function CategoryScreen() {
       try {
         const response = await apiService.getCategories();
         if (response.data) {
-          const foundCategory = response.data.categories.find((cat: Category) => cat.name === id);
+          const foundCategory = response.data.categories.find((cat: Category) => 
+            cat.name === id || cat.id === id
+          );
           setCategory(foundCategory || null);
         }
       } catch (error) {

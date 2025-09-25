@@ -20,19 +20,26 @@ Deno.serve(async (req) => {
 
     const { data: products, error } = await supabase
       .from('products')
-      .select('*')
+      .select(`
+        *,
+        categories (
+          id,
+          name
+        )
+      `)
       .eq('active', true)
-      .order('category')
+      .order('created_at', { ascending: false })
       .order('price_mru');
 
     if (error) throw error;
 
-    // Group products by category
+    // Group products by category name for backward compatibility
     const groupedProducts = products.reduce((acc: any, product: any) => {
-      if (!acc[product.category]) {
-        acc[product.category] = [];
+      const categoryName = product.categories?.name || 'uncategorized';
+      if (!acc[categoryName]) {
+        acc[categoryName] = [];
       }
-      acc[product.category].push(product);
+      acc[categoryName].push(product);
       return acc;
     }, {});
 

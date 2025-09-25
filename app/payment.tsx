@@ -45,7 +45,7 @@ export default function PaymentScreen() {
         if (token) {
           const response = await apiService.adminManageSettings(token, 'get');
           if (response.data?.settings?.payment_number) {
-            setPaymentPhoneNumber(response.data.settings.payment_number);
+            productCategory: product.categories?.name || 'general'
           }
         }
       } catch (error) {

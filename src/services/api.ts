@@ -192,6 +192,16 @@ class ApiClient {
     });
   }
 
+  async adminGetCategories(token: string) {
+    return this.request('admin_manage_categories', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        action: 'list',
+      }),
+    });
+  }
+
   async adminManageSettings(
     token: string,
     action: 'get' | 'update',

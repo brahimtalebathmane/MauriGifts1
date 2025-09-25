@@ -13,7 +13,7 @@ import { Settings, Plus, CreditCard as Edit, Trash2, X } from 'lucide-react-nati
 import { useAppStore } from '@/state/store';
 import { apiService } from '../../../src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import type { Product, AppSettings } from '../../../src/types';
+import type { Product, AppSettings, Category } from '../../../src/types';
 import { showSuccessToast, showErrorToast } from '../../../src/utils/toast';
 import { validatePrice } from '../../../src/utils/validation';
 import Card from '@/components/ui/Card';
@@ -55,9 +55,10 @@ export default function AdminProductsScreen() {
     else setLoading(true);
 
     try {
-      const [productsResponse, settingsResponse] = await Promise.all([
+      const [productsResponse, settingsResponse, categoriesResponse] = await Promise.all([
         apiService.adminManageProducts(token, 'list'),
         apiService.adminManageSettings(token, 'get'),
+        apiService.adminGetCategories(token),
       ]);
 
       if (productsResponse.data) {
@@ -66,6 +67,10 @@ export default function AdminProductsScreen() {
 
       if (settingsResponse.data) {
         setSettings(settingsResponse.data.settings);
+      }
+
+      if (categoriesResponse.data) {
+        setCategories(categoriesResponse.data.categories || []);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -84,7 +89,7 @@ export default function AdminProductsScreen() {
     if (product) {
       setEditingProduct(product);
       setFormData({
-        category: product.category,
+        category_id: product.category_id || '',
         name: product.name,
         title: product.meta?.title || '',
         sku: product.sku,
@@ -96,7 +101,7 @@ export default function AdminProductsScreen() {
     } else {
       setEditingProduct(null);
       setFormData({
-        category: 'pubg',
+        category_id: categories.length > 0 ? categories[0].id : '',
         name: '',
         title: '',
         sku: '',
@@ -113,7 +118,7 @@ export default function AdminProductsScreen() {
     setModalVisible(false);
     setEditingProduct(null);
     setFormData({
-      category: 'pubg',
+      category_id: '',
       name: '',
       title: '',
       sku: '',
@@ -328,7 +333,7 @@ export default function AdminProductsScreen() {
               <View style={styles.productDetails}>
                 <View style={styles.detailRow}>
                   <Text style={styles.detailValue}>
-                    {t(`categories.${product.category}`)}
+                    {categories.find(cat => cat.id === product.category_id)?.name || 'غير محدد'}
                   </Text>
                   <Text style={styles.detailLabel}>الفئة:</Text>
                 </View>
@@ -381,18 +386,18 @@ export default function AdminProductsScreen() {
             <Card style={styles.modalCard}>
               <View style={styles.formRow}>
                 <Text style={styles.formLabel}>الفئة</Text>
-                <View style={styles.categoryButtons}>
-                  {(['pubg', 'free_fire', 'itunes', 'psn'] as const).map((cat) => (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
+                  {categories.map((category) => (
                     <Button
-                      key={cat}
-                      title={t(`categories.${cat}`)}
+                      key={category.id}
+                      title={category.name}
                       size="small"
-                      variant={formData.category === cat ? 'primary' : 'outline'}
-                      onPress={() => setFormData(prev => ({ ...prev, category: cat }))}
+                      variant={formData.category_id === category.id ? 'primary' : 'outline'}
+                      onPress={() => setFormData(prev => ({ ...prev, category_id: category.id }))}
                       style={styles.categoryButton}
                     />
                   ))}
-                </View>
+                </ScrollView>
               </View>
 
               <Input
@@ -458,7 +463,7 @@ export default function AdminProductsScreen() {
                 title={editingProduct ? 'تحديث المنتج' : 'إضافة المنتج'}
                 onPress={handleSaveProduct}
                 loading={actionLoading}
-                disabled={!formData.name || !formData.title || !formData.sku || !formData.price_mru}
+                disabled={!formData.name || !formData.title || !formData.sku || !formData.price_mru || !formData.category_id}
                 style={styles.saveButton}
               />
             </Card>
@@ -667,9 +672,12 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
   },
+  categoryScroll: {
+    maxHeight: 100,
+  },
   categoryButton: {
-    flex: 1,
-    minWidth: '45%',
+    marginRight: 8,
+    minWidth: 120,
   },
   switchRow: {
     flexDirection: 'row',
