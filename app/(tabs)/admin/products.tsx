@@ -13,7 +13,7 @@ import { Settings, Plus, CreditCard as Edit, Trash2, X } from 'lucide-react-nati
 import { useAppStore } from '@/state/store';
 import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import type { Product, Settings } from '@/src/types';
+import type { Product, Settings as AppSettings } from '@/src/types';
 import { showSuccessToast, showErrorToast } from '@/src/utils/toast';
 import { validatePrice } from '@/src/utils/validation';
 import Card from '@/components/ui/Card';
@@ -26,7 +26,7 @@ export default function AdminProductsScreen() {
   const { token } = useAppStore();
   const { t } = useI18n();
   const [products, setProducts] = useState<Product[]>([]);
-  const [settings, setSettings] = useState<Settings>({
+  const [settings, setSettings] = useState<AppSettings>({
     payment_number: '41791082',
     app_name: 'MauriGift',
     app_version: '1.0.0',
@@ -152,7 +152,6 @@ export default function AdminProductsScreen() {
         ...(editingProduct && { id: editingProduct.id }),
       };
 
-      const response = await api.adminManageProducts(
       const response = await apiService.adminManageProducts(
         token,
         editingProduct ? 'update' : 'create',
