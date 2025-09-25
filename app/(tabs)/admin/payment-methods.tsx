@@ -12,9 +12,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CreditCard, Plus, CreditCard as Edit, Trash2 } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
-import { apiService as api } from '@/src/services/api';
+import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import { PaymentMethodDB } from '@/src/types';
+import type { PaymentMethodDB } from '@/src/types';
 import { showSuccessToast, showErrorToast } from '@/src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -44,7 +44,7 @@ export default function AdminPaymentMethodsScreen() {
     else setLoading(true);
 
     try {
-      const response = await api.adminManagePaymentMethods(token, 'list');
+      const response = await apiService.adminManagePaymentMethods(token, 'list');
       if (response.data) {
         setPaymentMethods(response.data.payment_methods || []);
       } else {
@@ -108,6 +108,7 @@ export default function AdminPaymentMethodsScreen() {
       };
 
       const response = await api.adminManagePaymentMethods(
+      const response = await apiService.adminManagePaymentMethods(
         token,
         editingMethod ? 'update' : 'create',
         methodData
@@ -141,7 +142,7 @@ export default function AdminPaymentMethodsScreen() {
             if (!token) return;
             
             try {
-              const response = await api.adminManagePaymentMethods(token, 'delete', { id: method.id });
+              const response = await apiService.adminManagePaymentMethods(token, 'delete', { id: method.id });
               if (response.data) {
                 showSuccessToast('تم حذف طريقة الدفع');
                 loadPaymentMethods();

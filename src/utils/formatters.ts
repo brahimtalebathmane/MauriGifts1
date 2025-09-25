@@ -23,3 +23,12 @@ export const formatDate = (dateString: string): string => {
     return date.toLocaleDateString('ar-SA');
   }
 };
+
+export const formatCurrency = (amount: number, currency: string = 'أوقية'): string => {
+  return `${formatPrice(amount)} ${currency}`;
+};
+
+export const truncateText = (text: string, maxLength: number): string => {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
+};

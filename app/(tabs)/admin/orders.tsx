@@ -12,9 +12,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClipboardList, Eye, X } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
-import { apiService as api } from '@/src/services/api';
+import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import { AdminOrder } from '@/src/types';
+import type { AdminOrder } from '@/src/types';
 import { formatPhoneNumber } from '@/src/utils/formatters';
 import { showSuccessToast, showErrorToast } from '@/src/utils/toast';
 import Card from '@/components/ui/Card';
@@ -45,7 +45,7 @@ export default function AdminOrdersScreen() {
     else setLoading(true);
 
     try {
-      const response = await api.adminListOrders(token, filterStatus || undefined);
+      const response = await apiService.adminListOrders(token, filterStatus || undefined);
       if (response.data) {
         setOrders(response.data.orders);
       } else {
@@ -74,7 +74,7 @@ export default function AdminOrdersScreen() {
 
     setActionLoading(true);
     try {
-      const response = await api.adminApproveOrder(token, selectedOrder.id, deliveryCode.trim());
+      const response = await apiService.adminApproveOrder(token, selectedOrder.id, deliveryCode.trim());
       if (response.data) {
         showSuccessToast('تم تأكيد الطلب بنجاح');
         closeModal();
@@ -100,7 +100,7 @@ export default function AdminOrdersScreen() {
 
     setActionLoading(true);
     try {
-      const response = await api.adminRejectOrder(token, selectedOrder.id, rejectionReason.trim());
+      const response = await apiService.adminRejectOrder(token, selectedOrder.id, rejectionReason.trim());
       if (response.data) {
         showSuccessToast('تم رفض الطلب');
         closeModal();

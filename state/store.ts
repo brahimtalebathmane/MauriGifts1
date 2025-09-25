@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { storage } from '@/src/utils/storage';
-import { User, Product, Order, Notification } from '@/src/types';
+import type { User, Product, Order, Notification } from '@/src/types';
+import { STORAGE_KEYS } from '@/src/config/app';
 
 interface AppState {
   // Auth
@@ -71,8 +72,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     
     try {
       await Promise.all([
-        storage.removeItem('user'),
-        storage.removeItem('token'),
+        storage.removeItem(STORAGE_KEYS.user),
+        storage.removeItem(STORAGE_KEYS.token),
       ]);
     } catch (error) {
       console.error('Error clearing storage:', error);
@@ -83,8 +84,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   loadFromStorage: async () => {
     try {
       const [userStr, tokenStr] = await Promise.all([
-        storage.getItem('user'),
-        storage.getItem('token'),
+        storage.getItem(STORAGE_KEYS.user),
+        storage.getItem(STORAGE_KEYS.token),
       ]);
       
       const user = userStr ? JSON.parse(userStr) : null;
@@ -102,10 +103,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       const { user, token } = get();
       
       if (user) {
-        await storage.setItem('user', JSON.stringify(user));
+        await storage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
       }
       if (token) {
-        await storage.setItem('token', token);
+        await storage.setItem(STORAGE_KEYS.token, token);
       }
     } catch (error) {
       console.error('Error saving to storage:', error);

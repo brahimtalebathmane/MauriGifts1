@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAppStore } from '@/state/store';
-import { apiService as api } from '@/src/services/api';
+import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
 import { validatePhoneNumber, validatePin } from '@/src/utils/validation';
 import { showErrorToast } from '@/src/utils/toast';
@@ -49,7 +49,7 @@ export default function LoginScreen() {
     setLoading(true);
     
     try {
-      const response = await api.login(formData.phoneNumber, formData.pin);
+      const response = await apiService.login(formData.phoneNumber, formData.pin);
 
       if (response.data) {
         setAuth(response.data.user, response.data.token);

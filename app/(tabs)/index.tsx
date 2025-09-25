@@ -11,9 +11,9 @@ import {
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppStore } from '@/state/store';
-import { apiService as api } from '@/src/services/api';
+import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import { Category } from '@/src/types';
+import type { Category } from '@/src/types';
 import { showErrorToast } from '@/src/utils/toast';
 import Card from '@/components/ui/Card';
 import Skeleton from '@/components/ui/Skeleton';
@@ -31,8 +31,8 @@ export default function HomeScreen() {
 
     try {
       const [productsResponse, categoriesResponse] = await Promise.all([
-        api.getProducts(),
-        api.getCategories(),
+        apiService.getProducts(),
+        apiService.getCategories(),
       ]);
       
       if (productsResponse.data) {

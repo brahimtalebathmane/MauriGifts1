@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAppStore } from '@/state/store';
-import { apiService as api } from '@/src/services/api';
+import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
 import { validatePhoneNumber, validatePin, validateName } from '@/src/utils/validation';
 import { showErrorToast } from '@/src/utils/toast';
@@ -59,7 +59,7 @@ export default function SignUpScreen() {
     setLoading(true);
     
     try {
-      const response = await api.signup(
+      const response = await apiService.signup(
         formData.name.trim(),
         formData.phoneNumber,
         formData.pin

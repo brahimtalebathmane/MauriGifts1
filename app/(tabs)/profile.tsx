@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAppStore } from '@/state/store';
-import { apiService as api } from '@/src/services/api';
+import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
 import { formatPhoneNumber } from '@/src/utils/formatters';
 import { showSuccessToast, showErrorToast } from '@/src/utils/toast';
@@ -70,7 +70,7 @@ export default function ProfileScreen() {
 
     setPinLoading(true);
     try {
-      const response = await api.changePin(token, pinData.currentPin, pinData.newPin);
+      const response = await apiService.changePin(token, pinData.currentPin, pinData.newPin);
       
       if (response.data) {
         showSuccessToast('تم تغيير الرمز بنجاح');

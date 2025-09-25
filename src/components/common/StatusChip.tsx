@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useI18n } from '@/hooks/useI18n';
 import { OrderStatus } from '@/src/types';
+import { ORDER_STATUS_COLORS } from '@/src/constants';
 
 interface StatusChipProps {
   status: OrderStatus;
@@ -9,38 +10,11 @@ interface StatusChipProps {
 
 const StatusChip: React.FC<StatusChipProps> = ({ status }) => {
   const { t } = useI18n();
-
-  const getStatusStyle = () => {
-    switch (status) {
-      case 'completed':
-        return [styles.chip, styles.success];
-      case 'rejected':
-        return [styles.chip, styles.error];
-      case 'under_review':
-        return [styles.chip, styles.warning];
-      case 'awaiting_payment':
-      default:
-        return [styles.chip, styles.info];
-    }
-  };
-
-  const getTextStyle = () => {
-    switch (status) {
-      case 'completed':
-        return [styles.text, styles.successText];
-      case 'rejected':
-        return [styles.text, styles.errorText];
-      case 'under_review':
-        return [styles.text, styles.warningText];
-      case 'awaiting_payment':
-      default:
-        return [styles.text, styles.infoText];
-    }
-  };
+  const colors = ORDER_STATUS_COLORS[status];
 
   return (
-    <View style={getStatusStyle()}>
-      <Text style={getTextStyle()}>
+    <View style={[styles.chip, { backgroundColor: colors.bg }]}>
+      <Text style={[styles.text, { color: colors.text }]}>
         {t(`order_status.${status}`)}
       </Text>
     </View>
@@ -57,30 +31,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 12,
     fontWeight: '600',
-  },
-  success: {
-    backgroundColor: '#D1FAE5',
-  },
-  error: {
-    backgroundColor: '#FEE2E2',
-  },
-  warning: {
-    backgroundColor: '#FEF3C7',
-  },
-  info: {
-    backgroundColor: '#DBEAFE',
-  },
-  successText: {
-    color: '#065F46',
-  },
-  errorText: {
-    color: '#991B1B',
-  },
-  warningText: {
-    color: '#92400E',
-  },
-  infoText: {
-    color: '#1E40AF',
   },
 });
 

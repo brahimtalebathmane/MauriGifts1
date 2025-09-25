@@ -12,9 +12,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FolderOpen, Plus, CreditCard as Edit, Trash2, X } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
-import { apiService as api } from '@/src/services/api';
+import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import { Category } from '@/src/types';
+import type { Category } from '@/src/types';
 import { showSuccessToast, showErrorToast } from '@/src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -43,7 +43,7 @@ export default function AdminCategoriesScreen() {
     else setLoading(true);
 
     try {
-      const response = await api.adminManageCategories(token, 'list');
+      const response = await apiService.adminManageCategories(token, 'list');
       if (response.data) {
         setCategories(response.data.categories || []);
       } else {
@@ -105,7 +105,7 @@ export default function AdminCategoriesScreen() {
         categoryData.id = editingCategory.id;
       }
 
-      const response = await api.adminManageCategories(
+      const response = await apiService.adminManageCategories(
         token,
         editingCategory ? 'update' : 'create',
         categoryData
@@ -139,7 +139,7 @@ export default function AdminCategoriesScreen() {
             if (!token) return;
             
             try {
-              const response = await api.adminManageCategories(token, 'delete', { id: category.id });
+              const response = await apiService.adminManageCategories(token, 'delete', { id: category.id });
               if (response.data) {
                 showSuccessToast('تم حذف الفئة');
                 loadCategories();

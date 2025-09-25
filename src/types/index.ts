@@ -9,21 +9,27 @@ export interface User {
 
 export interface Product {
   id: string;
-  category: 'pubg' | 'free_fire' | 'itunes' | 'psn';
+  category: ProductCategory;
   name: string;
   sku: string;
   price_mru: number;
   active: boolean;
-  meta: any;
+  meta: ProductMeta;
   created_at: string;
+}
+
+export interface ProductMeta {
+  title?: string;
+  amount?: string;
+  currency?: string;
 }
 
 export interface Order {
   id: string;
   user_id: string;
   product_id: string;
-  status: 'awaiting_payment' | 'under_review' | 'completed' | 'rejected';
-  payment_method: 'bankily' | 'sidad' | 'masrvi' | 'bimbank' | 'amanati' | 'klik';
+  status: OrderStatus;
+  payment_method: PaymentMethod;
   payment_number?: string;
   receipt_path?: string;
   admin_note?: string;
@@ -38,9 +44,15 @@ export interface Notification {
   user_id: string;
   title: string;
   body: string;
-  payload?: any;
+  payload?: NotificationPayload;
   seen: boolean;
   created_at: string;
+}
+
+export interface NotificationPayload {
+  order_id?: string;
+  delivery_code?: string;
+  reason?: string;
 }
 
 export interface AdminOrder extends Order {
@@ -75,7 +87,7 @@ export interface Category {
   id: string;
   name: string;
   image_url?: string;
-  created_at?: string;
+  created_at: string;
 }
 
 export interface PaymentMethodDB {
@@ -83,7 +95,7 @@ export interface PaymentMethodDB {
   name: string;
   logo_url?: string;
   status: 'active' | 'inactive';
-  created_at?: string;
+  created_at: string;
 }
 
 export interface ProductGuide {
@@ -96,6 +108,13 @@ export interface ProductGuide {
   created_at: string;
 }
 
+export interface ApiResponse<T = any> {
+  data?: T;
+  error?: string;
+}
+
+// Enums
 export type PaymentMethod = 'bankily' | 'sidad' | 'masrvi' | 'bimbank' | 'amanati' | 'klik';
 export type ProductCategory = 'pubg' | 'free_fire' | 'itunes' | 'psn';
 export type OrderStatus = 'awaiting_payment' | 'under_review' | 'completed' | 'rejected';
+export type UserRole = 'user' | 'admin';

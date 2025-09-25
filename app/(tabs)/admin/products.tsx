@@ -11,9 +11,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Settings, Plus, CreditCard as Edit, Trash2, X } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
-import { apiService as api } from '@/src/services/api';
+import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import { Product, Settings as SettingsType } from '@/src/types';
+import type { Product, Settings } from '@/src/types';
 import { showSuccessToast, showErrorToast } from '@/src/utils/toast';
 import { validatePrice } from '@/src/utils/validation';
 import Card from '@/components/ui/Card';
@@ -56,8 +56,8 @@ export default function AdminProductsScreen() {
 
     try {
       const [productsResponse, settingsResponse] = await Promise.all([
-        api.adminManageProducts(token, 'list'),
-        api.adminManageSettings(token, 'get'),
+        apiService.adminManageProducts(token, 'list'),
+        apiService.adminManageSettings(token, 'get'),
       ]);
 
       if (productsResponse.data) {
@@ -153,6 +153,7 @@ export default function AdminProductsScreen() {
       };
 
       const response = await api.adminManageProducts(
+      const response = await apiService.adminManageProducts(
         token,
         editingProduct ? 'update' : 'create',
         productData
@@ -186,7 +187,7 @@ export default function AdminProductsScreen() {
             if (!token) return;
             
             try {
-              const response = await api.adminManageProducts(token, 'delete', { id: product.id });
+              const response = await apiService.adminManageProducts(token, 'delete', { id: product.id });
               if (response.data) {
                 showSuccessToast('تم حذف المنتج');
                 loadData();
@@ -207,7 +208,7 @@ export default function AdminProductsScreen() {
 
     setActionLoading(true);
     try {
-      const response = await api.adminManageSettings(token, 'update', settings);
+      const response = await apiService.adminManageSettings(token, 'update', settings);
       
       if (response.data) {
         showSuccessToast('تم حفظ الإعدادات');

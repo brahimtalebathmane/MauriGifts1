@@ -4,8 +4,8 @@
     "strict": true,
     "paths": {
       "@/*": ["./*"],
-      "@/components/*": ["./components/*"],
       "@/src/*": ["./src/*"],
+      "@/components/*": ["./components/*"],
       "@/hooks/*": ["./hooks/*"],
       "@/state/*": ["./state/*"],
       "@/lib/*": ["./lib/*"],

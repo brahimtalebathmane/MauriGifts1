@@ -9,9 +9,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Users, User } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
-import { apiService as api } from '@/src/services/api';
+import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import { UserData } from '@/src/types';
+import type { UserData } from '@/src/types';
 import { formatPhoneNumber } from '@/src/utils/formatters';
 import { showErrorToast } from '@/src/utils/toast';
 import Card from '@/components/ui/Card';
@@ -32,7 +32,7 @@ export default function AdminUsersScreen() {
     else setLoading(true);
 
     try {
-      const response = await api.adminListUsers(token);
+      const response = await apiService.adminListUsers(token);
       if (response.data) {
         setUsers(response.data.users);
       } else {

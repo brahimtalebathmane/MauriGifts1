@@ -12,7 +12,7 @@ import { Copy } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { useAppStore } from '@/state/store';
-import { apiService as api } from '@/src/services/api';
+import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -34,7 +34,7 @@ export default function OrdersScreen() {
     else setLoading(true);
 
     try {
-      const response = await api.getMyOrders(token);
+      const response = await apiService.getMyOrders(token);
       if (response.data) {
         setOrders(response.data.orders);
       } else {

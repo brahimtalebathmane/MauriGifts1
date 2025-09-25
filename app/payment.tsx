@@ -11,9 +11,9 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowRight } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
-import { apiService as api } from '@/src/services/api';
+import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import { PaymentMethodDB } from '@/src/types';
+import type { PaymentMethodDB } from '@/src/types';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -37,13 +37,13 @@ export default function PaymentScreen() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const methodsResponse = await api.getPaymentMethods();
+        const methodsResponse = await apiService.getPaymentMethods();
         if (methodsResponse.data) {
           setPaymentMethods(methodsResponse.data.payment_methods || []);
         }
 
         if (token) {
-          const response = await api.adminManageSettings(token, 'get');
+          const response = await apiService.adminManageSettings(token, 'get');
           if (response.data?.settings?.payment_number) {
             setPaymentPhoneNumber(response.data.settings.payment_number);
           }
@@ -90,7 +90,7 @@ export default function PaymentScreen() {
 
     try {
       // Create order
-      const orderResponse = await api.createOrder(
+      const orderResponse = await apiService.createOrder(
         token,
         productId as string,
         selectedMethod,
@@ -110,7 +110,7 @@ export default function PaymentScreen() {
       }
 
       // Upload receipt
-      const uploadResponse = await api.uploadReceipt(
+      const uploadResponse = await apiService.uploadReceipt(
         token,
         orderId,
         receiptImage,

@@ -11,13 +11,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowRight } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
 import { useI18n } from '@/hooks/useI18n';
-import { Category } from '@/src/types';
+import type { Category, Product } from '@/src/types';
 import { showErrorToast } from '@/src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
-import { Product } from '@/src/types';
-import { apiService as api } from '@/src/services/api';
+import { apiService } from '@/src/services/api';
 
 export default function CategoryScreen() {
   const { id } = useLocalSearchParams();
@@ -30,7 +29,7 @@ export default function CategoryScreen() {
   React.useEffect(() => {
     const loadCategory = async () => {
       try {
-        const response = await api.getCategories();
+        const response = await apiService.getCategories();
         if (response.data) {
           const foundCategory = response.data.categories.find((cat: Category) => cat.name === id);
           setCategory(foundCategory || null);

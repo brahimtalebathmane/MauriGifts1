@@ -1,10 +1,5 @@
-const API_BASE_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1`;
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
-export interface ApiResponse<T = any> {
-  data?: T;
-  error?: string;
-}
+import { API_CONFIG } from '@/src/config/app';
+import type { ApiResponse } from '@/src/types';
 
 class ApiClient {
   private async request<T>(
@@ -12,11 +7,11 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
+      const response = await fetch(`${API_CONFIG.baseUrl}/${endpoint}`, {
         headers: {
           'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY || '',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY || ''}`,
+          'apikey': API_CONFIG.anonKey || '',
+          'Authorization': `Bearer ${API_CONFIG.anonKey || ''}`,
           ...options.headers,
         },
         ...options,
@@ -181,7 +176,7 @@ class ApiClient {
     });
   }
 
-  // Admin product management
+  // Admin management endpoints
   async adminManageProducts(
     token: string,
     action: 'list' | 'create' | 'update' | 'delete',
@@ -197,7 +192,6 @@ class ApiClient {
     });
   }
 
-  // Admin settings management
   async adminManageSettings(
     token: string,
     action: 'get' | 'update',
@@ -213,7 +207,6 @@ class ApiClient {
     });
   }
 
-  // Admin categories management
   async adminManageCategories(
     token: string,
     action: 'list' | 'create' | 'update' | 'delete',
@@ -229,7 +222,6 @@ class ApiClient {
     });
   }
 
-  // Admin payment methods management
   async adminManagePaymentMethods(
     token: string,
     action: 'list' | 'create' | 'update' | 'delete',
@@ -245,7 +237,6 @@ class ApiClient {
     });
   }
 
-  // Admin product guides management
   async adminManageProductGuides(
     token: string,
     action: 'list' | 'create' | 'update' | 'delete',
@@ -261,18 +252,7 @@ class ApiClient {
     });
   }
 
-  // Get product guides for purchased products
-  async getProductGuides(token: string, productId: string) {
-    return this.request('get_product_guides', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        product_id: productId,
-      }),
-    });
-  }
-
-  // Get categories
+  // Public endpoints
   async getCategories() {
     return this.request('list_categories', {
       method: 'POST',
@@ -280,7 +260,6 @@ class ApiClient {
     });
   }
 
-  // Get payment methods
   async getPaymentMethods() {
     return this.request('list_payment_methods', {
       method: 'POST',
@@ -288,7 +267,6 @@ class ApiClient {
     });
   }
 
-  // Get product guides for purchased products
   async getProductGuides(token: string, productId: string) {
     return this.request('get_product_guides', {
       method: 'POST',

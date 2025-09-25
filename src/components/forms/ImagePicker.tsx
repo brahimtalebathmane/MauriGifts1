@@ -16,11 +16,13 @@ import { useI18n } from '@/hooks/useI18n';
 interface ImagePickerComponentProps {
   onImageSelected: (base64: string, extension: string) => void;
   selectedImage?: string;
+  label?: string;
 }
 
 const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
   onImageSelected,
   selectedImage,
+  label,
 }) => {
   const { t } = useI18n();
   const [loading, setLoading] = useState(false);
@@ -134,7 +136,9 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{t('payment.receipt_image')}</Text>
+      <Text style={styles.label}>
+        {label || t('payment.receipt_image')}
+      </Text>
       
       {selectedImage ? (
         <TouchableOpacity style={styles.imageContainer} onPress={showActionSheet}>

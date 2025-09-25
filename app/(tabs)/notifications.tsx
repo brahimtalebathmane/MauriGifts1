@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bell, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
-import { apiService as api } from '@/src/services/api';
+import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
 import { formatDate } from '@/src/utils/formatters';
 import { showErrorToast } from '@/src/utils/toast';
@@ -32,7 +32,7 @@ export default function NotificationsScreen() {
     else setLoading(true);
 
     try {
-      const response = await api.getNotifications(token);
+      const response = await apiService.getNotifications(token);
       if (response.data) {
         setNotifications(response.data.notifications);
       } else {
@@ -52,7 +52,7 @@ export default function NotificationsScreen() {
     
     setMarkingRead(true);
     try {
-      const response = await api.getNotifications(token, true);
+      const response = await apiService.getNotifications(token, true);
       if (response.data) {
         setNotifications(response.data.notifications);
       } else {

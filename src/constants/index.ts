@@ -1,4 +1,4 @@
-import { PaymentMethod, ProductCategory } from '../types';
+import { PaymentMethod, ProductCategory } from '@/src/types';
 
 export const PAYMENT_METHODS: Record<PaymentMethod, { name: string; logo: string }> = {
   bankily: { name: 'بنكيلي', logo: 'https://i.postimg.cc/0ywf19DB/1200x630wa.png' },
@@ -17,3 +17,10 @@ export const CATEGORY_IMAGES: Record<ProductCategory, string> = {
 };
 
 export const DEFAULT_PAYMENT_NUMBER = '41791082';
+
+export const ORDER_STATUS_COLORS = {
+  awaiting_payment: { bg: '#DBEAFE', text: '#1E40AF' },
+  under_review: { bg: '#FEF3C7', text: '#92400E' },
+  completed: { bg: '#D1FAE5', text: '#065F46' },
+  rejected: { bg: '#FEE2E2', text: '#991B1B' },
+};
