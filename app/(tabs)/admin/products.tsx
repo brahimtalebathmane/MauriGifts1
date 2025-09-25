@@ -58,7 +58,7 @@ export default function AdminProductsScreen() {
       const [productsResponse, settingsResponse, categoriesResponse] = await Promise.all([
         apiService.adminManageProducts(token, 'list'),
         apiService.adminManageSettings(token, 'get'),
-        apiService.adminGetCategories(token),
+        apiService.adminManageCategories(token, 'list'),
       ]);
 
       if (productsResponse.data) {
