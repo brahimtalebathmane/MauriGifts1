@@ -20,31 +20,17 @@ import { apiService } from '../../src/services/api';
 
 export default function CategoryScreen() {
   const { id } = useLocalSearchParams();
-  const { products } = useAppStore();
+  const { products, categories } = useAppStore();
   const { t } = useI18n();
-  const [category, setCategory] = React.useState<Category | null>(null);
   
   // Decode the category name from URL
   const decodedId = decodeURIComponent(id as string);
   const categoryProducts = products[decodedId] || [];
-
-  React.useEffect(() => {
-    const loadCategory = async () => {
-      try {
-        const response = await apiService.getCategories();
-        if (response.data) {
-          const foundCategory = response.data.categories.find((cat: Category) => 
-            cat.name === decodedId || cat.id === decodedId
-          );
-          setCategory(foundCategory || null);
-        }
-      } catch (error) {
-        console.error('Error loading category:', error);
-      }
-    };
-    
-    loadCategory();
-  }, [decodedId]);
+  
+  // Find category from store
+  const category = categories.find((cat: Category) => 
+    cat.name === decodedId || cat.id === decodedId
+  ) || null;
 
   const handleProductSelect = (product: Product) => {
     if (!product.active) {

@@ -19,11 +19,10 @@ import Card from '@/components/ui/Card';
 import Skeleton from '@/components/ui/Skeleton';
 
 export default function HomeScreen() {
-  const { products, setProducts, user } = useAppStore();
+  const { products, setProducts, categories, setCategories, user } = useAppStore();
   const { t } = useI18n();
   const [loading, setLoading] = React.useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
-  const [categories, setCategories] = React.useState<Category[]>([]);
 
   const loadProducts = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -40,7 +39,8 @@ export default function HomeScreen() {
       }
       
       if (categoriesResponse.data) {
-        setCategories(categoriesResponse.data.categories || []);
+        const categoriesData = categoriesResponse.data.categories || [];
+        setCategories(categoriesData);
       }
       
       if (productsResponse.error) {

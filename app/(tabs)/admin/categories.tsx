@@ -114,11 +114,12 @@ export default function AdminCategoriesScreen() {
       if (response.data) {
         showSuccessToast(editingCategory ? 'تم تحديث الفئة' : 'تم إضافة الفئة');
         closeModal();
-        // Reload categories and refresh products to update grouping
-        await loadCategories();
-        // Also refresh products in the store to update category grouping
+        // Refresh categories and products immediately
+        await loadCategories(false);
+        // Update global store to refresh products and categories
         const { useAppStore } = await import('@/state/store');
-        useAppStore.getState().refreshProducts();
+        await useAppStore.getState().refreshProducts();
+        await useAppStore.getState().refreshCategories();
       } else {
         showErrorToast(response.error || 'خطأ في حفظ الفئة');
       }
@@ -146,7 +147,11 @@ export default function AdminCategoriesScreen() {
               const response = await apiService.adminManageCategories(token, 'delete', { id: category.id });
               if (response.data) {
                 showSuccessToast('تم حذف الفئة');
-                loadCategories();
+                await loadCategories(false);
+                // Update global store
+                const { useAppStore } = await import('@/state/store');
+                await useAppStore.getState().refreshProducts();
+                await useAppStore.getState().refreshCategories();
               } else {
                 showErrorToast(response.error || 'خطأ في حذف الفئة');
               }

@@ -81,10 +81,11 @@ Deno.serve(async (req) => {
       case 'create': {
         if (!product) throw new Error('بيانات المنتج مطلوبة');
         
-        // Validate required fields
-        if (!product.name || !product.sku || !product.price_mru || !product.category_id) {
-          throw new Error('الاسم ورمز المنتج والسعر والفئة مطلوبة');
-        }
+        // Validate required fields with proper error messages
+        if (!product.name) throw new Error('اسم المنتج مطلوب');
+        if (!product.sku) throw new Error('رمز المنتج مطلوب');
+        if (!product.price_mru || product.price_mru <= 0) throw new Error('السعر يجب أن يكون رقم موجب');
+        if (!product.category_id) throw new Error('يجب اختيار فئة للمنتج');
         
         // Verify category exists
         const { data: categoryExists, error: categoryError } = await supabase
@@ -96,6 +97,27 @@ Deno.serve(async (req) => {
         if (categoryError || !categoryExists) {
           throw new Error('الفئة المحددة غير موجودة');
         }
+
+
+      // Check if SKU already exists for other products
+      if (product.sku) {
+        const { data: existingSku } = await supabase
+          .from('products')
+          .select('id')
+          .eq('sku', product.sku)
+          .neq('id', product.id)
+          .single();
+        
+        if (existingSku) throw new Error('رمز المنتج موجود بالفعل');
+      }
+        // Check if SKU already exists
+        const { data: existingSku, error: skuError } = await supabase
+          .from('products')
+          .select('id')
+          .eq('sku', product.sku)
+          .single();
+
+        if (existingSku) throw new Error('رمز المنتج موجود بالفعل');
         
         const { data: newProduct, error } = await supabase
           .from('products')
@@ -130,6 +152,11 @@ Deno.serve(async (req) => {
 
       case 'update': {
         if (!product?.id) throw new Error('معرف المنتج مطلوب');
+        
+        // Validate required fields for update
+        if (product.name !== undefined && !product.name) throw new Error('اسم المنتج مطلوب');
+        if (product.sku !== undefined && !product.sku) throw new Error('رمز المنتج مطلوب');
+        if (product.price_mru !== undefined && product.price_mru <= 0) throw new Error('السعر يجب أن يكون رقم موجب');
         
         // If category_id is being updated, verify it exists
         if (product.category_id) {

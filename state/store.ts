@@ -18,15 +18,20 @@ interface AppState {
   // Notifications
   notifications: Notification[];
   unreadCount: number;
+
+  // Categories
+  categories: Category[];
   
   // Actions
   setAuth: (user: User | null, token: string | null) => void;
   setProducts: (products: Record<string, Product[]>) => void;
+  setCategories: (categories: Category[]) => void;
   setOrders: (orders: Order[]) => void;
   setNotifications: (notifications: Notification[]) => void;
   setLoading: (loading: boolean) => void;
   logout: () => void;
   refreshProducts: () => Promise<void>;
+  refreshCategories: () => Promise<void>;
   
   // Persistence
   loadFromStorage: () => Promise<void>;
@@ -41,6 +46,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   products: {},
   orders: [],
   notifications: [],
+  categories: [],
   unreadCount: 0,
 
   // Actions
@@ -50,6 +56,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   setProducts: (products) => set({ products }),
+
+  setCategories: (categories) => set({ categories }),
 
   setOrders: (orders) => set({ orders }),
 
@@ -71,6 +79,18 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
+  refreshCategories: async () => {
+    try {
+      const { apiService } = await import('../src/services/api');
+      const response = await apiService.getCategories();
+      if (response.data) {
+        set({ categories: response.data.categories || [] });
+      }
+    } catch (error) {
+      console.error('Error refreshing categories:', error);
+    }
+  },
+
   setLoading: (isLoading) => set({ isLoading }),
 
   logout: async () => {
@@ -79,6 +99,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       token: null, 
       orders: [],
       notifications: [],
+      categories: [],
       unreadCount: 0,
       products: {},
       isLoading: false

@@ -131,7 +131,7 @@ export default function AdminProductsScreen() {
   };
 
   const handleSaveProduct = async () => {
-    if (!token || !formData.name || !formData.title || !formData.sku || !formData.price_mru) {
+    if (!token || !formData.name || !formData.sku || !formData.price_mru || !formData.category_id) {
       showErrorToast('جميع الحقول مطلوبة');
       return;
     }
@@ -142,16 +142,21 @@ export default function AdminProductsScreen() {
       return;
     }
 
+    if (!formData.category_id) {
+      showErrorToast('يجب اختيار فئة للمنتج');
+      return;
+    }
+
     setActionLoading(true);
     try {
       const productData = {
-        category: formData.category,
+        category_id: formData.category_id,
         name: formData.name,
         sku: formData.sku,
         price_mru: price,
         active: formData.active,
         meta: {
-          title: formData.title,
+          title: formData.title || formData.name,
           amount: formData.amount,
           currency: formData.currency,
         },
@@ -167,8 +172,11 @@ export default function AdminProductsScreen() {
       if (response.data) {
         showSuccessToast(editingProduct ? 'تم تحديث المنتج' : 'تم إضافة المنتج');
         closeModal();
-        // Reload data to refresh products and categories
-        await loadData();
+        // Refresh data and update store immediately
+        await loadData(false);
+        // Update the global store to refresh user-side products
+        const { useAppStore } = await import('@/state/store');
+        await useAppStore.getState().refreshProducts();
       } else {
         showErrorToast(response.error || 'خطأ في حفظ المنتج');
       }
@@ -410,10 +418,10 @@ export default function AdminProductsScreen() {
               />
 
               <Input
-                label="العنوان المعروض للمستخدم"
+                label="العنوان المعروض للمستخدم (اختياري)"
                 value={formData.title}
                 onChangeText={(value) => setFormData(prev => ({ ...prev, title: value }))}
-                placeholder="مثال: 60 شدة أو 100 جوهرة"
+                placeholder="سيتم استخدام اسم المنتج إذا ترك فارغاً"
               />
 
               <Input
@@ -465,7 +473,7 @@ export default function AdminProductsScreen() {
                 title={editingProduct ? 'تحديث المنتج' : 'إضافة المنتج'}
                 onPress={handleSaveProduct}
                 loading={actionLoading}
-                disabled={!formData.name || !formData.title || !formData.sku || !formData.price_mru || !formData.category_id}
+                disabled={!formData.name || !formData.sku || !formData.price_mru || !formData.category_id}
                 style={styles.saveButton}
               />
             </Card>
