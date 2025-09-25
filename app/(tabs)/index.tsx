@@ -36,7 +36,7 @@ export default function HomeScreen() {
       ]);
       
       if (productsResponse.data) {
-        setProducts(productsResponse.data.products);
+        setProducts(productsResponse.data.products || {});
       }
       
       if (categoriesResponse.data) {
@@ -59,13 +59,13 @@ export default function HomeScreen() {
     loadProducts();
   }, []);
 
-  const handleCategoryPress = (category: string) => {
-    const categoryProducts = products[category];
+  const handleCategoryPress = (categoryName: string) => {
+    const categoryProducts = products[categoryName];
     if (!categoryProducts || categoryProducts.length === 0) {
       showErrorToast('لا توجد منتجات متاحة في هذه الفئة');
       return;
     }
-    router.push(`/category/${category}`);
+    router.push(`/category/${encodeURIComponent(categoryName)}`);
   };
 
   if (loading && Object.keys(products).length === 0) {

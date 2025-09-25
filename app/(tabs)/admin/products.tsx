@@ -167,7 +167,8 @@ export default function AdminProductsScreen() {
       if (response.data) {
         showSuccessToast(editingProduct ? 'تم تحديث المنتج' : 'تم إضافة المنتج');
         closeModal();
-        loadData();
+        // Reload data to refresh products and categories
+        await loadData();
       } else {
         showErrorToast(response.error || 'خطأ في حفظ المنتج');
       }

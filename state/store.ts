@@ -26,6 +26,7 @@ interface AppState {
   setNotifications: (notifications: Notification[]) => void;
   setLoading: (loading: boolean) => void;
   logout: () => void;
+  refreshProducts: () => Promise<void>;
   
   // Persistence
   loadFromStorage: () => Promise<void>;
@@ -55,6 +56,19 @@ export const useAppStore = create<AppState>((set, get) => ({
   setNotifications: (notifications) => {
     const unreadCount = notifications.filter(n => !n.seen).length;
     set({ notifications, unreadCount });
+  },
+
+  // Add method to refresh products after changes
+  refreshProducts: async () => {
+    try {
+      const { apiService } = await import('../src/services/api');
+      const response = await apiService.getProducts();
+      if (response.data) {
+        set({ products: response.data.products || {} });
+      }
+    } catch (error) {
+      console.error('Error refreshing products:', error);
+    }
   },
 
   setLoading: (isLoading) => set({ isLoading }),

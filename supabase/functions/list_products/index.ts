@@ -33,22 +33,32 @@ Deno.serve(async (req) => {
 
     if (error) throw error;
 
-    // Group products by category name and ID for proper linking
+    // Group products by category name and ID for backward compatibility
     const groupedProducts = products.reduce((acc: any, product: any) => {
-      const categoryName = product.categories?.name || 'uncategorized';
-      const categoryId = product.categories?.id || 'uncategorized';
+      // Use category name as primary key for grouping
+      const categoryName = product.categories?.name;
+      const categoryId = product.categories?.id;
       
-      // Group by both name and ID for backward compatibility
-      if (!acc[categoryName]) {
-        acc[categoryName] = [];
-      }
-      if (!acc[categoryId]) {
-        acc[categoryId] = [];
-      }
-      
-      acc[categoryName].push(product);
-      if (categoryId !== categoryName) {
-        acc[categoryId].push(product);
+      if (categoryName) {
+        // Group by category name (primary)
+        if (!acc[categoryName]) {
+          acc[categoryName] = [];
+        }
+        acc[categoryName].push(product);
+        
+        // Also group by category ID for compatibility
+        if (categoryId && categoryId !== categoryName) {
+          if (!acc[categoryId]) {
+            acc[categoryId] = [];
+          }
+          acc[categoryId].push(product);
+        }
+      } else {
+        // Handle products without category (fallback)
+        if (!acc['uncategorized']) {
+          acc['uncategorized'] = [];
+        }
+        acc['uncategorized'].push(product);
       }
       
       return acc;

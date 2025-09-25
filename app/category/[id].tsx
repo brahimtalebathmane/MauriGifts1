@@ -24,7 +24,9 @@ export default function CategoryScreen() {
   const { t } = useI18n();
   const [category, setCategory] = React.useState<Category | null>(null);
   
-  const categoryProducts = products[id as string] || [];
+  // Decode the category name from URL
+  const decodedId = decodeURIComponent(id as string);
+  const categoryProducts = products[decodedId] || [];
 
   React.useEffect(() => {
     const loadCategory = async () => {
@@ -32,7 +34,7 @@ export default function CategoryScreen() {
         const response = await apiService.getCategories();
         if (response.data) {
           const foundCategory = response.data.categories.find((cat: Category) => 
-            cat.name === id || cat.id === id
+            cat.name === decodedId || cat.id === decodedId
           );
           setCategory(foundCategory || null);
         }
@@ -42,7 +44,7 @@ export default function CategoryScreen() {
     };
     
     loadCategory();
-  }, [id]);
+  }, [decodedId]);
 
   const handleProductSelect = (product: Product) => {
     if (!product.active) {
@@ -90,7 +92,7 @@ export default function CategoryScreen() {
           <ArrowRight size={20} color="#374151" />
         </Button>
         <Text style={styles.title}>
-          {t(`categories.${id}`)}
+          {category?.name || decodedId}
         </Text>
       </View>
 

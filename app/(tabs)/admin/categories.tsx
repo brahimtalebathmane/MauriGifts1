@@ -114,7 +114,11 @@ export default function AdminCategoriesScreen() {
       if (response.data) {
         showSuccessToast(editingCategory ? 'تم تحديث الفئة' : 'تم إضافة الفئة');
         closeModal();
-        loadCategories();
+        // Reload categories and refresh products to update grouping
+        await loadCategories();
+        // Also refresh products in the store to update category grouping
+        const { useAppStore } = await import('@/state/store');
+        useAppStore.getState().refreshProducts();
       } else {
         showErrorToast(response.error || 'خطأ في حفظ الفئة');
       }
