@@ -23,7 +23,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
 
 export default function AdminCategoriesScreen() {
-  const { token } = useAppStore();
+  const { token, refreshData } = useAppStore();
   const { t } = useI18n();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
@@ -114,12 +114,12 @@ export default function AdminCategoriesScreen() {
       if (response.data) {
         showSuccessToast(editingCategory ? 'تم تحديث الفئة' : 'تم إضافة الفئة');
         closeModal();
-        // Refresh categories and products immediately
+        
+        // Refresh local data
         await loadCategories(false);
-        // Update global store to refresh products and categories
-        const { useAppStore } = await import('@/state/store');
-        await useAppStore.getState().refreshProducts();
-        await useAppStore.getState().refreshCategories();
+        
+        // Refresh global store for real-time updates
+        await refreshData();
       } else {
         showErrorToast(response.error || 'خطأ في حفظ الفئة');
       }
@@ -147,11 +147,12 @@ export default function AdminCategoriesScreen() {
               const response = await apiService.adminManageCategories(token, 'delete', { id: category.id });
               if (response.data) {
                 showSuccessToast('تم حذف الفئة');
+                
+                // Refresh local data
                 await loadCategories(false);
-                // Update global store
-                const { useAppStore } = await import('@/state/store');
-                await useAppStore.getState().refreshProducts();
-                await useAppStore.getState().refreshCategories();
+                
+                // Refresh global store for real-time updates
+                await refreshData();
               } else {
                 showErrorToast(response.error || 'خطأ في حذف الفئة');
               }

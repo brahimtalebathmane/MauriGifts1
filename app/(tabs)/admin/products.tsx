@@ -23,7 +23,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
 
 export default function AdminProductsScreen() {
-  const { token } = useAppStore();
+  const { token, refreshData } = useAppStore();
   const { t } = useI18n();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -172,11 +172,12 @@ export default function AdminProductsScreen() {
       if (response.data) {
         showSuccessToast(editingProduct ? 'تم تحديث المنتج' : 'تم إضافة المنتج');
         closeModal();
-        // Refresh data and update store immediately
+        
+        // Refresh local data
         await loadData(false);
-        // Update the global store to refresh user-side products
-        const { useAppStore } = await import('@/state/store');
-        await useAppStore.getState().refreshProducts();
+        
+        // Refresh global store for real-time updates
+        await refreshData();
       } else {
         showErrorToast(response.error || 'خطأ في حفظ المنتج');
       }
@@ -204,7 +205,8 @@ export default function AdminProductsScreen() {
               const response = await apiService.adminManageProducts(token, 'delete', { id: product.id });
               if (response.data) {
                 showSuccessToast('تم حذف المنتج');
-                loadData();
+                await loadData(false);
+                await refreshData();
               } else {
                 showErrorToast(response.error || 'خطأ في حذف المنتج');
               }

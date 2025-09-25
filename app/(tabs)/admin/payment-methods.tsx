@@ -23,7 +23,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
 
 export default function AdminPaymentMethodsScreen() {
-  const { token } = useAppStore();
+  const { token, refreshData } = useAppStore();
   const { t } = useI18n();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodDB[]>([]);
   const [loading, setLoading] = useState(false);
@@ -115,7 +115,8 @@ export default function AdminPaymentMethodsScreen() {
       if (response.data) {
         showSuccessToast(editingMethod ? 'تم تحديث طريقة الدفع' : 'تم إضافة طريقة الدفع');
         closeModal();
-        loadPaymentMethods();
+        await loadPaymentMethods(false);
+        await refreshData();
       } else {
         showErrorToast(response.error || 'خطأ في حفظ طريقة الدفع');
       }
@@ -143,7 +144,8 @@ export default function AdminPaymentMethodsScreen() {
               const response = await apiService.adminManagePaymentMethods(token, 'delete', { id: method.id });
               if (response.data) {
                 showSuccessToast('تم حذف طريقة الدفع');
-                loadPaymentMethods();
+                await loadPaymentMethods(false);
+                await refreshData();
               } else {
                 showErrorToast(response.error || 'خطأ في حذف طريقة الدفع');
               }

@@ -67,7 +67,7 @@ class ApiClient {
   }
 
   async getCategories() {
-    return this.request('get_categories', {
+    return this.request('list_categories', {
       method: 'POST',
       body: JSON.stringify({}),
     });

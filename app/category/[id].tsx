@@ -20,7 +20,7 @@ import { apiService } from '../../src/services/api';
 
 export default function CategoryScreen() {
   const { id } = useLocalSearchParams();
-  const { products, categories } = useAppStore();
+  const { products, categories, refreshData } = useAppStore();
   const { t } = useI18n();
   
   // Decode the category name from URL
@@ -31,6 +31,11 @@ export default function CategoryScreen() {
   const category = categories.find((cat: Category) => 
     cat.name === decodedId || cat.id === decodedId
   ) || null;
+
+  useEffect(() => {
+    // Refresh data when category page loads to ensure latest products
+    refreshData();
+  }, [decodedId, refreshData]);
 
   const handleProductSelect = (product: Product) => {
     if (!product.active) {

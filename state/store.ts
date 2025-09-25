@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { storage } from '../src/utils/storage';
-import type { User, Product, Order, Notification } from '@/src/types';
+import type { User, Product, Order, Notification, Category } from '@/src/types';
 import { STORAGE_KEYS } from '../src/config';
+import { apiService } from '../src/services/api';
 
 interface AppState {
   // Auth
@@ -30,8 +31,9 @@ interface AppState {
   setNotifications: (notifications: Notification[]) => void;
   setLoading: (loading: boolean) => void;
   logout: () => void;
-  refreshProducts: () => Promise<void>;
-  refreshCategories: () => Promise<void>;
+  refreshData: () => Promise<void>;
+  refreshProducts: () => Promise<boolean>;
+  refreshCategories: () => Promise<boolean>;
   
   // Persistence
   loadFromStorage: () => Promise<void>;
@@ -66,28 +68,53 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ notifications, unreadCount });
   },
 
-  // Add method to refresh products after changes
+  refreshData: async () => {
+    const state = get();
+    if (!state.token) return;
+
+    try {
+      const [productsResponse, categoriesResponse] = await Promise.all([
+        apiService.getProducts(),
+        apiService.getCategories(),
+      ]);
+      
+      if (productsResponse.data) {
+        set({ products: productsResponse.data.products || {} });
+      }
+      
+      if (categoriesResponse.data) {
+        set({ categories: categoriesResponse.data.categories || [] });
+      }
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    }
+  },
+
   refreshProducts: async () => {
     try {
-      const { apiService } = await import('../src/services/api');
       const response = await apiService.getProducts();
       if (response.data) {
         set({ products: response.data.products || {} });
+        return true;
       }
+      return false;
     } catch (error) {
       console.error('Error refreshing products:', error);
+      return false;
     }
   },
 
   refreshCategories: async () => {
     try {
-      const { apiService } = await import('../src/services/api');
       const response = await apiService.getCategories();
       if (response.data) {
         set({ categories: response.data.categories || [] });
+        return true;
       }
+      return false;
     } catch (error) {
       console.error('Error refreshing categories:', error);
+      return false;
     }
   },
 
