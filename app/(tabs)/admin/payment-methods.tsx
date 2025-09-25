@@ -107,7 +107,6 @@ export default function AdminPaymentMethodsScreen() {
         ...(editingMethod && { id: editingMethod.id }),
       };
 
-      const response = await api.adminManagePaymentMethods(
       const response = await apiService.adminManagePaymentMethods(
         token,
         editingMethod ? 'update' : 'create',
