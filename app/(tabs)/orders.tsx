@@ -12,14 +12,14 @@ import { Copy } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { useAppStore } from '@/state/store';
-import { apiService } from '@/src/services/api';
+import { apiService } from '../../src/services/api';
 import { useI18n } from '@/hooks/useI18n';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
-import StatusChip from '@/src/components/common/StatusChip';
+import StatusChip from '../../src/components/common/StatusChip';
 import Skeleton from '@/components/ui/Skeleton';
-import { showSuccessToast, showErrorToast } from '@/src/utils/toast';
+import { showSuccessToast, showErrorToast } from '../../src/utils/toast';
 
 export default function OrdersScreen() {
   const { orders, setOrders, token } = useAppStore();

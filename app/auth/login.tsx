@@ -10,10 +10,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAppStore } from '@/state/store';
-import { apiService } from '@/src/services/api';
+import { apiService } from '../../src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import { validatePhoneNumber, validatePin } from '@/src/utils/validation';
-import { showErrorToast } from '@/src/utils/toast';
+import { validatePhoneNumber, validatePin } from '../../src/utils/validation';
+import { showErrorToast } from '../../src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';

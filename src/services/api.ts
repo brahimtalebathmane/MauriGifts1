@@ -1,4 +1,4 @@
-import { API_CONFIG } from '@/src/config/app';
+import { API_CONFIG } from '@/src/config';
 import type { ApiResponse } from '@/src/types';
 
 class ApiClient {

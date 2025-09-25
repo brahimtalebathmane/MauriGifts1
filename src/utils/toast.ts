@@ -32,7 +32,7 @@ export const showInfoToast = (message: string, title?: string) => {
 
 export const showWarningToast = (message: string, title?: string) => {
   Toast.show({
-    type: 'info', // Using info type as warning might not be available
+    type: 'info',
     text1: title || 'تحذير',
     text2: message,
     position: 'top',

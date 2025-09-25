@@ -12,16 +12,16 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ClipboardList, Eye, X } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
-import { apiService } from '@/src/services/api';
+import { apiService } from '../../../src/services/api';
 import { useI18n } from '@/hooks/useI18n';
 import type { AdminOrder } from '@/src/types';
-import { formatPhoneNumber } from '@/src/utils/formatters';
-import { showSuccessToast, showErrorToast } from '@/src/utils/toast';
+import { formatPhoneNumber } from '../../../src/utils/formatters';
+import { showSuccessToast, showErrorToast } from '../../../src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import EmptyState from '@/components/ui/EmptyState';
-import StatusChip from '@/src/components/common/StatusChip';
+import StatusChip from '../../../src/components/common/StatusChip';
 import Skeleton from '@/components/ui/Skeleton';
 
 export default function AdminOrdersScreen() {

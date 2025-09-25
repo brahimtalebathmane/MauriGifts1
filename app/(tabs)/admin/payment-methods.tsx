@@ -12,10 +12,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CreditCard, Plus, CreditCard as Edit, Trash2 } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
-import { apiService } from '@/src/services/api';
+import { apiService } from '../../../src/services/api';
 import { useI18n } from '@/hooks/useI18n';
 import type { PaymentMethodDB } from '@/src/types';
-import { showSuccessToast, showErrorToast } from '@/src/utils/toast';
+import { showSuccessToast, showErrorToast } from '../../../src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';

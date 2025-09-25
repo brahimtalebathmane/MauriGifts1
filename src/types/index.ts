@@ -77,7 +77,7 @@ export interface UserData {
   order_count: number;
 }
 
-export interface Settings {
+export interface AppSettings {
   payment_number: string;
   app_name: string;
   app_version: string;

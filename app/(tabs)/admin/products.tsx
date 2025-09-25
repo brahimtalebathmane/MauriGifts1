@@ -11,11 +11,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Settings, Plus, CreditCard as Edit, Trash2, X } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
-import { apiService } from '@/src/services/api';
+import { apiService } from '../../../src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import type { Product, Settings as AppSettings } from '@/src/types';
-import { showSuccessToast, showErrorToast } from '@/src/utils/toast';
-import { validatePrice } from '@/src/utils/validation';
+import type { Product, AppSettings } from '../../../src/types';
+import { showSuccessToast, showErrorToast } from '../../../src/utils/toast';
+import { validatePrice } from '../../../src/utils/validation';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';

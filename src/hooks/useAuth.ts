@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useAppStore } from '@/state/store';
 import { apiService } from '@/src/services/api';
 import { showErrorToast, showSuccessToast } from '@/src/utils/toast';
-import { ROUTES } from '@/src/config/app';
+import { ROUTES } from '@/src/config';
 
 export const useAuth = () => {
   const { setAuth, logout: storeLogout, user, token, isLoading } = useAppStore();

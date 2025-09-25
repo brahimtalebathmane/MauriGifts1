@@ -9,10 +9,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bell, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
-import { apiService } from '@/src/services/api';
+import { apiService } from '../../src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import { formatDate } from '@/src/utils/formatters';
-import { showErrorToast } from '@/src/utils/toast';
+import { formatDate } from '../../src/utils/formatters';
+import { showErrorToast } from '../../src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';

@@ -9,11 +9,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Users, User } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
-import { apiService } from '@/src/services/api';
+import { apiService } from '../../../src/services/api';
 import { useI18n } from '@/hooks/useI18n';
 import type { UserData } from '@/src/types';
-import { formatPhoneNumber } from '@/src/utils/formatters';
-import { showErrorToast } from '@/src/utils/toast';
+import { formatPhoneNumber } from '../../../src/utils/formatters';
+import { showErrorToast } from '../../../src/utils/toast';
 import Card from '@/components/ui/Card';
 import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';

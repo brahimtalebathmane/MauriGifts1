@@ -1,4 +1,4 @@
-import { PaymentMethod, ProductCategory } from '@/src/types';
+import type { PaymentMethod, ProductCategory } from '@/src/types';
 
 export const PAYMENT_METHODS: Record<PaymentMethod, { name: string; logo: string }> = {
   bankily: { name: 'بنكيلي', logo: 'https://i.postimg.cc/0ywf19DB/1200x630wa.png' },
