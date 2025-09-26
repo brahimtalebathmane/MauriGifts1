@@ -173,11 +173,15 @@ export default function AdminProductsScreen() {
         showSuccessToast(editingProduct ? 'تم تحديث المنتج' : 'تم إضافة المنتج');
         closeModal();
         
-        // Refresh local data
-        await loadData(false);
+        // Refresh both local and global data to ensure synchronization
+        const [localRefresh, globalRefresh] = await Promise.all([
+          loadData(false),
+          refreshData()
+        ]);
         
-        // Refresh global store for real-time updates
-        await refreshData();
+        if (!globalRefresh) {
+          console.warn('Global data refresh failed, but local data was updated');
+        }
       } else {
         showErrorToast(response.error || 'خطأ في حفظ المنتج');
       }

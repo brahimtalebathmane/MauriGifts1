@@ -33,20 +33,20 @@ Deno.serve(async (req) => {
 
     if (error) throw error;
 
-    // Group products by category name and ID for backward compatibility
+    // Group products by category name with proper fallback handling
     const groupedProducts = products.reduce((acc: any, product: any) => {
-      // Use category name as primary key for grouping
-      const categoryName = product.categories?.name;
-      const categoryId = product.categories?.id;
+      const category = product.categories;
       
-      if (categoryName) {
-        // Group by category name (primary)
+      if (category && category.name) {
+        // Primary grouping by category name
+        const categoryName = category.name;
         if (!acc[categoryName]) {
           acc[categoryName] = [];
         }
         acc[categoryName].push(product);
         
-        // Also group by category ID for compatibility
+        // Also group by category ID for backward compatibility
+        const categoryId = category.id;
         if (categoryId && categoryId !== categoryName) {
           if (!acc[categoryId]) {
             acc[categoryId] = [];
@@ -54,11 +54,23 @@ Deno.serve(async (req) => {
           acc[categoryId].push(product);
         }
       } else {
-        // Handle products without category (fallback)
-        if (!acc['uncategorized']) {
-          acc['uncategorized'] = [];
+        // Handle products without proper category relationship
+        console.warn('Product without category found:', product.id, product.name);
+        
+        // Try to group by legacy category field if it exists
+        const legacyCategory = product.category;
+        if (legacyCategory) {
+          if (!acc[legacyCategory]) {
+            acc[legacyCategory] = [];
+          }
+          acc[legacyCategory].push(product);
+        } else {
+          // Put uncategorized products in a fallback category
+          if (!acc['uncategorized']) {
+            acc['uncategorized'] = [];
+          }
+          acc['uncategorized'].push(product);
         }
-        acc['uncategorized'].push(product);
       }
       
       return acc;

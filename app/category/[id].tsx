@@ -25,7 +25,14 @@ export default function CategoryScreen() {
   
   // Decode the category name from URL
   const decodedId = decodeURIComponent(id as string);
-  const categoryProducts = products[decodedId] || [];
+  
+  // Try to find products by category name or ID
+  let categoryProducts = products[decodedId] || [];
+  
+  // If no products found by name, try to find by category ID
+  if (categoryProducts.length === 0 && category?.id) {
+    categoryProducts = products[category.id] || [];
+  }
   
   // Find category from store
   const category = categories.find((cat: Category) => 

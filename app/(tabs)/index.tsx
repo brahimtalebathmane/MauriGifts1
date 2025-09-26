@@ -62,8 +62,8 @@ export default function HomeScreen() {
   const handleCategoryPress = (categoryName: string) => {
     const categoryProducts = products[categoryName];
     if (!categoryProducts || categoryProducts.length === 0) {
-      showErrorToast('لا توجد منتجات متاحة في هذه الفئة');
-      return;
+      // Still allow navigation even if no products, they might be added later
+      console.log('No products found for category:', categoryName);
     }
     router.push(`/category/${encodeURIComponent(categoryName)}`);
   };

@@ -99,17 +99,6 @@ Deno.serve(async (req) => {
         }
 
 
-      // Check if SKU already exists for other products
-      if (product.sku) {
-        const { data: existingSku } = await supabase
-          .from('products')
-          .select('id')
-          .eq('sku', product.sku)
-          .neq('id', product.id)
-          .single();
-        
-        if (existingSku) throw new Error('رمز المنتج موجود بالفعل');
-      }
         // Check if SKU already exists
         const { data: existingSku, error: skuError } = await supabase
           .from('products')
@@ -169,6 +158,18 @@ Deno.serve(async (req) => {
           if (categoryError || !categoryExists) {
             throw new Error('الفئة المحددة غير موجودة');
           }
+        }
+        
+        // Check SKU uniqueness for updates
+        if (product.sku) {
+          const { data: existingSku } = await supabase
+            .from('products')
+            .select('id')
+            .eq('sku', product.sku)
+            .neq('id', product.id)
+            .single();
+          
+          if (existingSku) throw new Error('رمز المنتج موجود بالفعل');
         }
         
         const { id, ...updateData } = product;
