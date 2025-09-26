@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
     const { data: categories, error } = await supabase
       .from('categories')
       .select('*')
-      .order('name');
+      .order('created_at');
 
     if (error) throw error;
 

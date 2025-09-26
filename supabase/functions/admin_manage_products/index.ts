@@ -133,6 +133,7 @@ Deno.serve(async (req) => {
             meta: product,
           });
 
+        console.log('Created product:', newProduct.name, 'in category:', newProduct.categories?.name);
         return new Response(
           JSON.stringify({ product: newProduct }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

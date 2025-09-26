@@ -142,10 +142,6 @@ export default function AdminProductsScreen() {
       return;
     }
 
-    if (!formData.category_id) {
-      showErrorToast('يجب اختيار فئة للمنتج');
-      return;
-    }
 
     setActionLoading(true);
     try {
@@ -173,15 +169,11 @@ export default function AdminProductsScreen() {
         showSuccessToast(editingProduct ? 'تم تحديث المنتج' : 'تم إضافة المنتج');
         closeModal();
         
-        // Refresh both local and global data to ensure synchronization
-        const [localRefresh, globalRefresh] = await Promise.all([
+        // Refresh data to show new/updated product
+        await Promise.all([
           loadData(false),
           refreshData()
         ]);
-        
-        if (!globalRefresh) {
-          console.warn('Global data refresh failed, but local data was updated');
-        }
       } else {
         showErrorToast(response.error || 'خطأ في حفظ المنتج');
       }

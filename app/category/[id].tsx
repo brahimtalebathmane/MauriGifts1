@@ -26,18 +26,20 @@ export default function CategoryScreen() {
   // Decode the category name from URL
   const decodedId = decodeURIComponent(id as string);
   
-  // Try to find products by category name or ID
-  let categoryProducts = products[decodedId] || [];
-  
-  // If no products found by name, try to find by category ID
-  if (categoryProducts.length === 0 && category?.id) {
-    categoryProducts = products[category.id] || [];
-  }
-  
   // Find category from store
   const category = categories.find((cat: Category) => 
     cat.name === decodedId || cat.id === decodedId
   ) || null;
+  
+  // Try to find products by category name first, then by ID
+  let categoryProducts = products[decodedId] || [];
+  
+  // If no products found by name and we have a category, try by ID
+  if (categoryProducts.length === 0 && category?.id) {
+    categoryProducts = products[category.id] || [];
+  }
+  
+  console.log(`Category: ${decodedId}, Products found: ${categoryProducts.length}`);
 
   useEffect(() => {
     // Refresh data when category page loads to ensure latest products

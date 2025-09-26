@@ -35,11 +35,14 @@ export default function HomeScreen() {
       ]);
       
       if (productsResponse.data) {
-        setProducts(productsResponse.data.products || {});
+        const productsData = productsResponse.data.products || {};
+        console.log('Loaded products:', Object.keys(productsData).length, 'categories');
+        setProducts(productsData);
       }
       
       if (categoriesResponse.data) {
         const categoriesData = categoriesResponse.data.categories || [];
+        console.log('Loaded categories:', categoriesData.length);
         setCategories(categoriesData);
       }
       
@@ -61,10 +64,7 @@ export default function HomeScreen() {
 
   const handleCategoryPress = (categoryName: string) => {
     const categoryProducts = products[categoryName];
-    if (!categoryProducts || categoryProducts.length === 0) {
-      // Still allow navigation even if no products, they might be added later
-      console.log('No products found for category:', categoryName);
-    }
+    console.log(`Navigating to category: ${categoryName}, products: ${categoryProducts?.length || 0}`);
     router.push(`/category/${encodeURIComponent(categoryName)}`);
   };
 
