@@ -18,32 +18,59 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    // Get all categories with product count
+    console.log('Loading categories with product counts...');
+
+    // Get all categories with their active product counts
     const { data: categories, error } = await supabase
       .from('categories')
       .select(`
-        *,
+        id,
+        name,
+        image_url,
+        created_at,
         products!inner (
           id
         )
       `)
+      .eq('products.active', true)
       .order('created_at');
 
     if (error) {
-      console.error('Database error:', error);
+      console.error('Database error loading categories:', error);
       throw error;
     }
 
-    // Transform to include product count and clean structure
-    const categoriesWithCount = categories.map(category => ({
-      id: category.id,
-      name: category.name,
-      image_url: category.image_url,
-      created_at: category.created_at,
-      product_count: category.products?.length || 0
-    }));
+    // Also get categories without products to show them in the list
+    const { data: allCategories, error: allCategoriesError } = await supabase
+      .from('categories')
+      .select('id, name, image_url, created_at')
+      .order('created_at');
 
-    console.log(`Loaded ${categoriesWithCount.length} categories from database`);
+    if (allCategoriesError) {
+      console.error('Error loading all categories:', allCategoriesError);
+      throw allCategoriesError;
+    }
+
+    // Transform to include product count and ensure all categories are included
+    const categoriesWithCount = allCategories.map(category => {
+      const categoryWithProducts = categories?.find(c => c.id === category.id);
+      const productCount = categoryWithProducts?.products?.length || 0;
+      
+      return {
+        id: category.id,
+        name: category.name,
+        image_url: category.image_url,
+        created_at: category.created_at,
+        product_count: productCount
+      };
+    });
+
+    console.log(`Successfully loaded ${categoriesWithCount.length} categories from database`);
+    
+    // Log category details
+    categoriesWithCount.forEach(category => {
+      console.log(`Category "${category.name}": ${category.product_count} products`);
+    });
 
     return new Response(
       JSON.stringify({ categories: categoriesWithCount }),

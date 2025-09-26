@@ -30,22 +30,19 @@ export default function CategoryScreen() {
     cat.name === decodedId || cat.id === decodedId
   ) || null;
   
-  // Try to find products by category name first, then by ID
+  // Find products by category name
   let categoryProducts: Product[] = [];
   
   if (products[decodedId]) {
     categoryProducts = products[decodedId];
-  } else if (category?.id && products[category.id]) {
-    categoryProducts = products[category.id];
   }
   
   console.log(`Category: ${decodedId}, Products found: ${categoryProducts.length}`);
-  console.log('Available product groups:', Object.keys(products));
 
   useEffect(() => {
-    // Refresh data when category page loads to ensure latest products
+    // Refresh data when category page loads
     refreshData();
-  }, [decodedId, refreshData]);
+  }, [decodedId]);
 
   const handleProductSelect = (product: Product) => {
     if (!product.active) {

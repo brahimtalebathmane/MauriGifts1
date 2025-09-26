@@ -73,18 +73,23 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (!state.token) return;
 
     try {
+      console.log('Refreshing global data...');
       const [productsResponse, categoriesResponse] = await Promise.all([
         apiService.getProducts(),
         apiService.getCategories(),
       ]);
       
       if (productsResponse.data) {
+        console.log('Updated products in store:', Object.keys(productsResponse.data.products || {}).length, 'categories');
         set({ products: productsResponse.data.products || {} });
       }
       
       if (categoriesResponse.data) {
+        console.log('Updated categories in store:', (categoriesResponse.data.categories || []).length, 'categories');
         set({ categories: categoriesResponse.data.categories || [] });
       }
+      
+      console.log('Global data refresh completed successfully');
     } catch (error) {
       console.error('Error refreshing data:', error);
     }
@@ -92,8 +97,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   refreshProducts: async () => {
     try {
+      console.log('Refreshing products...');
       const response = await apiService.getProducts();
       if (response.data) {
+        console.log('Products refreshed:', Object.keys(response.data.products || {}).length, 'categories');
         set({ products: response.data.products || {} });
         return true;
       }
@@ -106,8 +113,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   refreshCategories: async () => {
     try {
+      console.log('Refreshing categories...');
       const response = await apiService.getCategories();
       if (response.data) {
+        console.log('Categories refreshed:', (response.data.categories || []).length, 'categories');
         set({ categories: response.data.categories || [] });
         return true;
       }

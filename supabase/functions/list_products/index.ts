@@ -18,62 +18,74 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    console.log('Loading products with categories...');
+
     // Get all active products with their categories
     const { data: products, error } = await supabase
       .from('products')
       .select(`
         *,
-        categories (
+        categories!inner (
           id,
           name,
           image_url
         )
       `)
       .eq('active', true)
-      .not('category_id', 'is', null)
+      .order('categories(name)')
       .order('price_mru');
 
     if (error) {
-      console.error('Database error:', error);
+      console.error('Database error loading products:', error);
       throw error;
     }
 
-    console.log(`Loaded ${products?.length || 0} products from database`);
+    console.log(`Successfully loaded ${products?.length || 0} products from database`);
 
-    // Group products by category name and ID for maximum compatibility
+    if (!products || products.length === 0) {
+      console.log('No products found in database');
+      return new Response(
+        JSON.stringify({ products: {} }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Group products by category name for the frontend
     const groupedProducts = products.reduce((acc: any, product: any) => {
       const category = product.categories;
       
-      if (category && category.name && category.id) {
+      if (category && category.name) {
         const categoryName = category.name;
-        const categoryId = category.id;
         
-        // Group by category name (primary)
         if (!acc[categoryName]) {
           acc[categoryName] = [];
         }
-        acc[categoryName].push(product);
         
-        // Also group by category ID (secondary for compatibility)
-        if (!acc[categoryId]) {
-          acc[categoryId] = [];
-        }
-        acc[categoryId].push(product);
+        acc[categoryName].push({
+          ...product,
+          categories: category // Ensure category data is included
+        });
         
-        console.log(`Product "${product.name}" added to category "${categoryName}" (${categoryId})`);
+        console.log(`Added product "${product.name}" to category "${categoryName}"`);
       } else {
-        console.error('Product without proper category found:', {
+        console.error('Product found without proper category:', {
           id: product.id,
           name: product.name,
-          category_id: product.category_id,
-          category: category
+          category_id: product.category_id
         });
       }
       
       return acc;
     }, {});
 
-    console.log('Product groups created:', Object.keys(groupedProducts));
+    const categoryNames = Object.keys(groupedProducts);
+    console.log(`Created ${categoryNames.length} product groups:`, categoryNames);
+    
+    // Log product counts per category
+    categoryNames.forEach(categoryName => {
+      const count = groupedProducts[categoryName].length;
+      console.log(`Category "${categoryName}": ${count} products`);
+    });
 
     return new Response(
       JSON.stringify({ products: groupedProducts }),

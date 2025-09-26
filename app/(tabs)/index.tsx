@@ -38,23 +38,19 @@ export default function HomeScreen() {
       if (productsResponse.data) {
         const productsData = productsResponse.data.products || {};
         console.log('Loaded products:', Object.keys(productsData).length, 'categories');
-        console.log('Product categories:', Object.keys(productsData));
         setProducts(productsData);
       } else {
         console.error('Failed to load products:', productsResponse.error);
+        showErrorToast('خطأ في تحميل المنتجات');
       }
       
       if (categoriesResponse.data) {
         const categoriesData = categoriesResponse.data.categories || [];
         console.log('Loaded categories:', categoriesData.length);
-        console.log('Categories:', categoriesData.map(c => c.name));
         setCategories(categoriesData);
       } else {
         console.error('Failed to load categories:', categoriesResponse.error);
-      }
-      
-      if (productsResponse.error || categoriesResponse.error) {
-        showErrorToast('خطأ في تحميل البيانات');
+        showErrorToast('خطأ في تحميل الفئات');
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -67,17 +63,10 @@ export default function HomeScreen() {
 
   useEffect(() => {
     loadData();
-    
-    // Set up periodic refresh every 30 seconds to catch any updates
-    const interval = setInterval(() => {
-      refreshData();
-    }, 30000);
-    
-    return () => clearInterval(interval);
   }, []);
 
   const handleCategoryPress = (category: Category) => {
-    const categoryProducts = products[category.name] || products[category.id] || [];
+    const categoryProducts = products[category.name] || [];
     console.log(`Navigating to category: ${category.name}, products: ${categoryProducts.length}`);
     router.push(`/category/${encodeURIComponent(category.name)}`);
   };
