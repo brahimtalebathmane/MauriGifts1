@@ -18,49 +18,62 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // Get all active products with their categories
     const { data: products, error } = await supabase
       .from('products')
       .select(`
         *,
         categories (
           id,
-          name
+          name,
+          image_url
         )
       `)
       .eq('active', true)
       .not('category_id', 'is', null)
-      .order('categories(name)')
       .order('price_mru');
 
-    if (error) throw error;
+    if (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+
+    console.log(`Loaded ${products?.length || 0} products from database`);
 
     // Group products by category name and ID for maximum compatibility
     const groupedProducts = products.reduce((acc: any, product: any) => {
       const category = product.categories;
       
       if (category && category.name && category.id) {
-        // Group by category name (primary)
         const categoryName = category.name;
+        const categoryId = category.id;
+        
+        // Group by category name (primary)
         if (!acc[categoryName]) {
           acc[categoryName] = [];
         }
         acc[categoryName].push(product);
         
         // Also group by category ID (secondary for compatibility)
-        const categoryId = category.id;
-        if (categoryId) {
-          if (!acc[categoryId]) {
-            acc[categoryId] = [];
-          }
-          acc[categoryId].push(product);
+        if (!acc[categoryId]) {
+          acc[categoryId] = [];
         }
+        acc[categoryId].push(product);
+        
+        console.log(`Product "${product.name}" added to category "${categoryName}" (${categoryId})`);
       } else {
-        // This should not happen after migration, but handle gracefully
-        console.error('Product without category found after migration:', product.id, product.name);
+        console.error('Product without proper category found:', {
+          id: product.id,
+          name: product.name,
+          category_id: product.category_id,
+          category: category
+        });
       }
       
       return acc;
     }, {});
+
+    console.log('Product groups created:', Object.keys(groupedProducts));
 
     return new Response(
       JSON.stringify({ products: groupedProducts }),

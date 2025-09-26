@@ -16,7 +16,6 @@ import { showErrorToast } from '../../src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
-import { apiService } from '../../src/services/api';
 
 export default function CategoryScreen() {
   const { id } = useLocalSearchParams();
@@ -32,14 +31,16 @@ export default function CategoryScreen() {
   ) || null;
   
   // Try to find products by category name first, then by ID
-  let categoryProducts = products[decodedId] || [];
+  let categoryProducts: Product[] = [];
   
-  // If no products found by name and we have a category, try by ID
-  if (categoryProducts.length === 0 && category?.id) {
-    categoryProducts = products[category.id] || [];
+  if (products[decodedId]) {
+    categoryProducts = products[decodedId];
+  } else if (category?.id && products[category.id]) {
+    categoryProducts = products[category.id];
   }
   
   console.log(`Category: ${decodedId}, Products found: ${categoryProducts.length}`);
+  console.log('Available product groups:', Object.keys(products));
 
   useEffect(() => {
     // Refresh data when category page loads to ensure latest products
@@ -58,7 +59,7 @@ export default function CategoryScreen() {
         productId: product.id, 
         productName: product.name,
         productPrice: product.price_mru.toString(),
-        productCategory: product.category
+        productCategory: category?.name || decodedId
       }
     });
   };

@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Image,
-  TouchableOpacity,
   RefreshControl,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -24,11 +23,13 @@ export default function HomeScreen() {
   const [loading, setLoading] = React.useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
 
-  const loadProducts = async (isRefresh = false) => {
+  const loadData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
 
     try {
+      console.log('Loading products and categories...');
+      
       const [productsResponse, categoriesResponse] = await Promise.all([
         apiService.getProducts(),
         apiService.getCategories(),
@@ -37,20 +38,26 @@ export default function HomeScreen() {
       if (productsResponse.data) {
         const productsData = productsResponse.data.products || {};
         console.log('Loaded products:', Object.keys(productsData).length, 'categories');
+        console.log('Product categories:', Object.keys(productsData));
         setProducts(productsData);
+      } else {
+        console.error('Failed to load products:', productsResponse.error);
       }
       
       if (categoriesResponse.data) {
         const categoriesData = categoriesResponse.data.categories || [];
         console.log('Loaded categories:', categoriesData.length);
+        console.log('Categories:', categoriesData.map(c => c.name));
         setCategories(categoriesData);
+      } else {
+        console.error('Failed to load categories:', categoriesResponse.error);
       }
       
-      if (productsResponse.error) {
-        showErrorToast(productsResponse.error || t('errors.generic'));
+      if (productsResponse.error || categoriesResponse.error) {
+        showErrorToast('خطأ في تحميل البيانات');
       }
     } catch (error) {
-      console.error('Error loading products:', error);
+      console.error('Error loading data:', error);
       showErrorToast(t('errors.network'));
     } finally {
       setLoading(false);
@@ -59,13 +66,20 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-    loadProducts();
+    loadData();
+    
+    // Set up periodic refresh every 30 seconds to catch any updates
+    const interval = setInterval(() => {
+      refreshData();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
-  const handleCategoryPress = (categoryName: string) => {
-    const categoryProducts = products[categoryName];
-    console.log(`Navigating to category: ${categoryName}, products: ${categoryProducts?.length || 0}`);
-    router.push(`/category/${encodeURIComponent(categoryName)}`);
+  const handleCategoryPress = (category: Category) => {
+    const categoryProducts = products[category.name] || products[category.id] || [];
+    console.log(`Navigating to category: ${category.name}, products: ${categoryProducts.length}`);
+    router.push(`/category/${encodeURIComponent(category.name)}`);
   };
 
   if (loading && Object.keys(products).length === 0) {
@@ -101,34 +115,45 @@ export default function HomeScreen() {
       <ScrollView
         style={styles.content}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => loadProducts(true)} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => loadData(true)} />
         }
       >
         <Text style={styles.sectionTitle}>{t('home.categories')}</Text>
         
         <View style={styles.grid}>
-          {categories.map((category) => (
-            <Card
-              key={category.id || category.name}
-              style={styles.categoryCard}
-              onPress={() => handleCategoryPress(category.name)}
-            >
-              <Image
-                source={{ uri: category.image_url || 'https://via.placeholder.com/300x200' }}
-                style={styles.categoryImage}
-                resizeMode="cover"
-              />
-              <View style={styles.cardContent}>
-                <Text style={styles.categoryTitle}>
-                  {category.name}
-                </Text>
-                <Text style={styles.productCount}>
-                  {products[category.name]?.length || 0} منتج
-                </Text>
-              </View>
-            </Card>
-          ))}
+          {categories.map((category) => {
+            const categoryProducts = products[category.name] || products[category.id] || [];
+            const productCount = categoryProducts.length;
+            
+            return (
+              <Card
+                key={category.id}
+                style={styles.categoryCard}
+                onPress={() => handleCategoryPress(category)}
+              >
+                <Image
+                  source={{ uri: category.image_url || 'https://via.placeholder.com/300x200' }}
+                  style={styles.categoryImage}
+                  resizeMode="cover"
+                />
+                <View style={styles.cardContent}>
+                  <Text style={styles.categoryTitle}>
+                    {category.name}
+                  </Text>
+                  <Text style={styles.productCount}>
+                    {productCount} منتج
+                  </Text>
+                </View>
+              </Card>
+            );
+          })}
         </View>
+
+        {categories.length === 0 && !loading && (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>لا توجد فئات متاحة</Text>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -192,5 +217,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     textAlign: 'right',
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
   },
 });

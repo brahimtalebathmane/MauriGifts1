@@ -18,15 +18,35 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // Get all categories with product count
     const { data: categories, error } = await supabase
       .from('categories')
-      .select('*')
+      .select(`
+        *,
+        products!inner (
+          id
+        )
+      `)
       .order('created_at');
 
-    if (error) throw error;
+    if (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+
+    // Transform to include product count and clean structure
+    const categoriesWithCount = categories.map(category => ({
+      id: category.id,
+      name: category.name,
+      image_url: category.image_url,
+      created_at: category.created_at,
+      product_count: category.products?.length || 0
+    }));
+
+    console.log(`Loaded ${categoriesWithCount.length} categories from database`);
 
     return new Response(
-      JSON.stringify({ categories }),
+      JSON.stringify({ categories: categoriesWithCount }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
