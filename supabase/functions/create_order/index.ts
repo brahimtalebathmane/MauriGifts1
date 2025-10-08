@@ -10,10 +10,12 @@ const corsHeaders = {
 const createOrderSchema = z.object({
   token: z.string().min(1),
   product_id: z.string().uuid(),
-  payment_method: z.enum(['bankily', 'sidad', 'masrvi', 'bimbank', 'amanati', 'klik']),
+  payment_method: z.string().min(1),
   payment_number: z.string().min(1),
 });
 
+// Valid payment method enum values
+const validPaymentMethods = ['bankily', 'sidad', 'masrvi', 'bimbank', 'amanati', 'klik'];
 async function validateSession(supabase: any, token: string) {
   const { data: session, error } = await supabase
     .from('sessions')
@@ -43,6 +45,14 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const { token, product_id, payment_method, payment_number } = createOrderSchema.parse(body);
+
+    // Validate payment method enum
+    if (!validPaymentMethods.includes(payment_method)) {
+      return new Response(
+        JSON.stringify({ error: `طريقة الدفع غير صالحة. القيم المسموحة: ${validPaymentMethods.join(', ')}` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     const userId = await validateSession(supabase, token);
 

@@ -33,6 +33,16 @@ export default function PaymentScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [paymentPhoneNumber, setPaymentPhoneNumber] = useState('41791082');
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodDB[]>([]);
+  
+  // Map payment method names to enum values
+  const paymentMethodEnumMap: Record<string, string> = {
+    'بنكيلي': 'bankily',
+    'السداد': 'sidad', 
+    'مصرفي': 'masrvi',
+    'بيم بنك': 'bimbank',
+    'أمانتي': 'amanati',
+    'كليك': 'klik'
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -45,7 +55,7 @@ export default function PaymentScreen() {
         if (token) {
           const response = await apiService.adminManageSettings(token, 'get');
           if (response.data?.settings?.payment_number) {
-            productCategory: product.categories?.name || 'general'
+            setPaymentPhoneNumber(response.data.settings.payment_number);
           }
         }
       } catch (error) {
@@ -89,11 +99,23 @@ export default function PaymentScreen() {
     setLoading(true);
 
     try {
+      // Convert payment method name to enum value
+      const selectedPaymentMethod = paymentMethods.find(method => 
+        (method.id === selectedMethod || method.name === selectedMethod)
+      );
+      
+      if (!selectedPaymentMethod) {
+        showErrorToast('طريقة الدفع المحددة غير صالحة');
+        return;
+      }
+      
+      const paymentMethodEnum = paymentMethodEnumMap[selectedPaymentMethod.name] || selectedPaymentMethod.name.toLowerCase();
+      
       // Create order
       const orderResponse = await apiService.createOrder(
         token,
         productId as string,
-        selectedMethod,
+        paymentMethodEnum,
         paymentNumber
       );
 
