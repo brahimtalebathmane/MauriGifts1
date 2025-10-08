@@ -64,11 +64,11 @@ Deno.serve(async (req) => {
     // Convert base64 to Uint8Array
     const fileData = Uint8Array.from(atob(fileBase64), c => c.charCodeAt(0));
     
-    // Generate unique filename
+    // Generate unique filename following convention: receipts/{order_id}/{timestamp}.{ext}
     const timestamp = Date.now();
-    const fileName = `receipts/${order_id}/${timestamp}.${fileExt}`;
+    const fileName = `${order_id}/${timestamp}.${fileExt}`;
 
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage using SERVICE_ROLE key
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('receipts')
       .upload(fileName, fileData, {

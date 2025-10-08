@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify({ user: userResponse, token }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {

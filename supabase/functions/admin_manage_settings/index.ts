@@ -58,7 +58,11 @@ Deno.serve(async (req) => {
         if (error) throw error;
 
         const settingsMap = settingsData.reduce((acc: any, setting: any) => {
-          acc[setting.key] = setting.value;
+          try {
+            acc[setting.key] = JSON.parse(setting.value);
+          } catch {
+            acc[setting.key] = setting.value;
+          }
           return acc;
         }, {});
 
