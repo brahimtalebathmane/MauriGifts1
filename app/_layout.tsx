@@ -19,6 +19,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="auth/login" />
         <Stack.Screen name="auth/signup" />
+        <Stack.Screen name="auth/verify-otp" />
         <Stack.Screen name="category/[id]" />
         <Stack.Screen name="payment" />
         <Stack.Screen name="index" />
