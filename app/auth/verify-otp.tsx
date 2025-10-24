@@ -10,10 +10,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
 import { useAppStore } from '@/state/store';
 import { useI18n } from '@/hooks/useI18n';
 import { showErrorToast } from '../../src/utils/toast';
+import { storage } from '../../src/utils/storage';
+import { STORAGE_KEYS } from '../../src/config';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -71,7 +72,7 @@ export default function VerifyOTPScreen() {
       const data: VerifyOTPResponse = await response.json();
 
       if (data.success && data.token) {
-        await SecureStore.setItemAsync('session_token', data.token);
+        await storage.setItem(STORAGE_KEYS.token, data.token);
 
         Toast.show({
           type: 'success',
