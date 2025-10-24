@@ -4,17 +4,16 @@
     "slug": "bolt-expo-nativewind",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/images/icon.png"
     },
     "web": {
       "bundler": "metro",
-      "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "output": "single"
     },
     "plugins": ["expo-router", "expo-font", "expo-web-browser"],
     "experiments": {
