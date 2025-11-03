@@ -221,15 +221,22 @@ export default function AdminOrdersScreen() {
                 </Text>
               </View>
 
-              <Text style={styles.productName}>
-                {order.products.name}
-              </Text>
+              <View style={styles.productHeader}>
+                <Text style={styles.productName}>
+                  {order.products.name}
+                </Text>
+                {order.products.categories && (
+                  <Text style={styles.categoryBadge}>
+                    {order.products.categories.name}
+                  </Text>
+                )}
+              </View>
 
               <View style={styles.orderDetails}>
                 <Text style={styles.customerName}>
                   {order.users.name} - {formatPhoneNumber(order.users.phone_number)}
                 </Text>
-                
+
                 <View style={styles.detailRow}>
                   <Text style={styles.detailValue}>
                     {order.products.price_mru} أوقية
@@ -250,6 +257,29 @@ export default function AdminOrdersScreen() {
                       {order.payment_number}
                     </Text>
                     <Text style={styles.detailLabel}>رقم الدفع:</Text>
+                  </View>
+                )}
+
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailValue}>
+                    {order.products.sku}
+                  </Text>
+                  <Text style={styles.detailLabel}>رمز المنتج:</Text>
+                </View>
+
+                {order.receipt_path ? (
+                  <View style={styles.detailRow}>
+                    <Text style={[styles.detailValue, styles.hasReceiptText]}>
+                      ✓ تم الرفع
+                    </Text>
+                    <Text style={styles.detailLabel}>الإيصال:</Text>
+                  </View>
+                ) : (
+                  <View style={styles.detailRow}>
+                    <Text style={[styles.detailValue, styles.noReceiptTextSmall]}>
+                      ✗ لم يُرفع
+                    </Text>
+                    <Text style={styles.detailLabel}>الإيصال:</Text>
                   </View>
                 )}
               </View>
@@ -297,14 +327,142 @@ export default function AdminOrdersScreen() {
             {selectedOrder && (
               <>
                 <Card style={styles.modalCard}>
-                  <StatusChip status={selectedOrder.status} />
-                  <Text style={styles.modalProductName}>
-                    {selectedOrder.products.name}
-                  </Text>
-                  <Text style={styles.modalCustomer}>
-                    {selectedOrder.users.name} - {formatPhoneNumber(selectedOrder.users.phone_number)}
-                  </Text>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>معلومات الطلب</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoValue}>{selectedOrder.id.slice(0, 8)}...</Text>
+                    <Text style={styles.infoLabel}>رقم الطلب:</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <StatusChip status={selectedOrder.status} />
+                    <Text style={styles.infoLabel}>الحالة:</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoValue}>
+                      {new Date(selectedOrder.created_at).toLocaleDateString('ar-SA', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </Text>
+                    <Text style={styles.infoLabel}>تاريخ الطلب:</Text>
+                  </View>
                 </Card>
+
+                <Card style={styles.modalCard}>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>معلومات المستخدم</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoValue}>{selectedOrder.users.name}</Text>
+                    <Text style={styles.infoLabel}>الاسم:</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoValue}>{formatPhoneNumber(selectedOrder.users.phone_number)}</Text>
+                    <Text style={styles.infoLabel}>رقم الهاتف:</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoValue}>
+                      {new Date(selectedOrder.users.created_at).toLocaleDateString('ar-SA')}
+                    </Text>
+                    <Text style={styles.infoLabel}>عضو منذ:</Text>
+                  </View>
+                </Card>
+
+                <Card style={styles.modalCard}>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>تفاصيل المنتج</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoValue}>{selectedOrder.products.name}</Text>
+                    <Text style={styles.infoLabel}>اسم المنتج:</Text>
+                  </View>
+                  {selectedOrder.products.categories && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoValue}>{selectedOrder.products.categories.name}</Text>
+                      <Text style={styles.infoLabel}>الفئة:</Text>
+                    </View>
+                  )}
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoValue}>{selectedOrder.products.sku}</Text>
+                    <Text style={styles.infoLabel}>رمز المنتج:</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoPriceValue}>{selectedOrder.products.price_mru} أوقية</Text>
+                    <Text style={styles.infoLabel}>السعر:</Text>
+                  </View>
+                  {selectedOrder.products.meta?.title && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoValue}>{selectedOrder.products.meta.title}</Text>
+                      <Text style={styles.infoLabel}>العنوان:</Text>
+                    </View>
+                  )}
+                  {selectedOrder.products.meta?.amount && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoValue}>{selectedOrder.products.meta.amount}</Text>
+                      <Text style={styles.infoLabel}>الكمية:</Text>
+                    </View>
+                  )}
+                </Card>
+
+                <Card style={styles.modalCard}>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>تفاصيل الدفع</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoValue}>
+                      {t(`payment_methods.${selectedOrder.payment_method}`)}
+                    </Text>
+                    <Text style={styles.infoLabel}>طريقة الدفع:</Text>
+                  </View>
+                  {selectedOrder.payment_number && (
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoValue}>{selectedOrder.payment_number}</Text>
+                      <Text style={styles.infoLabel}>رقم الدفع:</Text>
+                    </View>
+                  )}
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoPriceValue}>{selectedOrder.products.price_mru} أوقية</Text>
+                    <Text style={styles.infoLabel}>المبلغ المطلوب:</Text>
+                  </View>
+                </Card>
+
+                {selectedOrder.receipt_path && (
+                  <Card style={styles.modalCard}>
+                    <View style={styles.sectionHeader}>
+                      <Text style={styles.sectionTitle}>إيصال الدفع</Text>
+                    </View>
+                    <View style={styles.receiptPreviewContainer}>
+                      <Image
+                        source={{
+                          uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/public/receipts/${selectedOrder.receipt_path}`
+                        }}
+                        style={styles.receiptPreview}
+                        resizeMode="cover"
+                      />
+                      <Button
+                        title="عرض بالحجم الكامل"
+                        variant="outline"
+                        onPress={() => viewReceipt(selectedOrder)}
+                        style={styles.viewFullButton}
+                      />
+                    </View>
+                  </Card>
+                )}
+
+                {!selectedOrder.receipt_path && (
+                  <Card style={styles.modalCard}>
+                    <View style={styles.sectionHeader}>
+                      <Text style={styles.sectionTitle}>إيصال الدفع</Text>
+                    </View>
+                    <View style={styles.noReceiptContainer}>
+                      <Text style={styles.noReceiptText}>لم يتم رفع إيصال بعد</Text>
+                    </View>
+                  </Card>
+                )}
 
                 {selectedOrder.status === 'under_review' && (
                   <Card style={styles.modalCard}>
@@ -347,7 +505,9 @@ export default function AdminOrdersScreen() {
 
                 {selectedOrder.delivery_code && (
                   <Card style={styles.modalCard}>
-                    <Text style={styles.sectionTitle}>كود الشحن</Text>
+                    <View style={styles.sectionHeader}>
+                      <Text style={styles.sectionTitle}>كود التسليم</Text>
+                    </View>
                     <Text style={styles.deliveryCode}>
                       {selectedOrder.delivery_code}
                     </Text>
@@ -356,21 +516,12 @@ export default function AdminOrdersScreen() {
 
                 {selectedOrder.admin_note && (
                   <Card style={styles.modalCard}>
-                    <Text style={styles.sectionTitle}>ملاحظة الرفض</Text>
+                    <View style={styles.sectionHeader}>
+                      <Text style={styles.sectionTitle}>ملاحظة الإدارة</Text>
+                    </View>
                     <Text style={styles.adminNote}>
                       {selectedOrder.admin_note}
                     </Text>
-                  </Card>
-                )}
-
-                {selectedOrder.receipt_path && (
-                  <Card style={styles.modalCard}>
-                    <Text style={styles.sectionTitle}>الإيصال</Text>
-                    <Button
-                      title="عرض الإيصال"
-                      variant="outline"
-                      onPress={() => viewReceipt(selectedOrder)}
-                    />
                   </Card>
                 )}
               </>
@@ -466,12 +617,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
   },
+  productHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   productName: {
     fontSize: 18,
     fontWeight: '600',
     color: '#1F2937',
-    marginBottom: 8,
     textAlign: 'right',
+    flex: 1,
+  },
+  categoryBadge: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#2563EB',
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  hasReceiptText: {
+    color: '#059669',
+    fontWeight: '600',
+  },
+  noReceiptTextSmall: {
+    color: '#DC2626',
+    fontWeight: '600',
   },
   orderDetails: {
     marginBottom: 12,
@@ -546,12 +721,71 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'right',
   },
+  sectionHeader: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    paddingBottom: 8,
+    marginBottom: 16,
+  },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 12,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1F2937',
     textAlign: 'right',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingVertical: 4,
+  },
+  infoLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
+    flex: 0.4,
+    textAlign: 'right',
+  },
+  infoValue: {
+    fontSize: 14,
+    color: '#374151',
+    flex: 0.6,
+    textAlign: 'left',
+  },
+  infoPriceValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#059669',
+    flex: 0.6,
+    textAlign: 'left',
+  },
+  receiptPreviewContainer: {
+    alignItems: 'center',
+  },
+  receiptPreview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+    marginBottom: 12,
+  },
+  viewFullButton: {
+    width: '100%',
+  },
+  noReceiptContainer: {
+    padding: 24,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+  },
+  noReceiptText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    textAlign: 'center',
   },
   actionButtons: {
     marginBottom: 16,

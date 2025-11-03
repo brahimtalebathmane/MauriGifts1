@@ -68,11 +68,20 @@ export interface AdminOrder extends Order {
     id: string;
     name: string;
     phone_number: string;
+    created_at: string;
   };
   products: {
     id: string;
     name: string;
+    sku: string;
     price_mru: number;
+    meta: ProductMeta;
+    category_id: string;
+    categories?: {
+      id: string;
+      name: string;
+      image_url?: string;
+    };
   };
 }
 

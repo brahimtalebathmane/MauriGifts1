@@ -52,8 +52,25 @@ Deno.serve(async (req) => {
       .from('orders')
       .select(`
         *,
-        users (id, name, phone_number),
-        products (*)
+        users (
+          id,
+          name,
+          phone_number,
+          created_at
+        ),
+        products (
+          id,
+          name,
+          sku,
+          price_mru,
+          meta,
+          category_id,
+          categories (
+            id,
+            name,
+            image_url
+          )
+        )
       `)
       .order('created_at', { ascending: false });
 
