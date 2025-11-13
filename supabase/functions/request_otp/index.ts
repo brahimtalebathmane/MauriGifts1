@@ -57,7 +57,9 @@ Deno.serve(async (req: Request) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const phoneNumber = phone.length === 11 ? phone.slice(-8) : phone;
+    const phoneNumber = phone.replace(/\D/g, '').slice(-8);
+
+    const formattedWhatsAppPhone = `+222${phoneNumber}`;
 
     const otpCode = generateOTP();
     const otpTTLMinutes = parseInt(Deno.env.get("OTP_TTL_MINUTES") || "5");
@@ -117,7 +119,7 @@ Deno.serve(async (req: Request) => {
 
     try {
       const whatsappPayload = {
-        to: `whatsapp:+${phone}`,
+        to: `whatsapp:${formattedWhatsAppPhone}`,
         message: `Your MauriGifts verification code is ${otpCode}`,
       };
 

@@ -76,7 +76,7 @@ Deno.serve(async (req: Request) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const phoneNumber = phone.length === 11 ? phone.slice(-8) : phone;
+    const phoneNumber = phone.replace(/\D/g, '').slice(-8);
 
     const otpResponse = await fetch(
       `${supabaseUrl}/rest/v1/otp_codes?phone_number=eq.${phoneNumber}&code=eq.${otp}&verified=eq.false&select=*`,

@@ -34,7 +34,8 @@ interface RequestOTPResponse {
 }
 
 export default function VerifyOTPScreen() {
-  const { phone } = useLocalSearchParams<{ phone: string }>();
+  const params = useLocalSearchParams<{ phone: string; token?: string; userId?: string }>();
+  const { phone, token: signupToken, userId: signupUserId } = params;
   const { setAuth } = useAppStore();
   const { t } = useI18n();
   const [otp, setOtp] = useState('');
@@ -58,13 +59,15 @@ export default function VerifyOTPScreen() {
     setError('');
 
     try {
+      const formattedPhone = phone.startsWith('+222') ? phone : `+222${phone}`;
+
       const response = await fetch(`${SUPABASE_URL}/functions/v1/verify_otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          phone,
+          phone: formattedPhone,
           otp,
         }),
       });
@@ -123,13 +126,15 @@ export default function VerifyOTPScreen() {
     setError('');
 
     try {
+      const formattedPhone = phone.startsWith('+222') ? phone : `+222${phone}`;
+
       const response = await fetch(`${SUPABASE_URL}/functions/v1/request_otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          phone,
+          phone: formattedPhone,
         }),
       });
 
