@@ -75,11 +75,50 @@ Deno.serve(async (req) => {
     // Create session
     const token = await createSession(supabase, user.id);
 
+    // Format phone number for WhatsApp (add +222 prefix if not present)
+    let whatsappPhone = phone_number;
+    if (!whatsappPhone.startsWith('+222')) {
+      whatsappPhone = `+222${whatsappPhone}`;
+    }
+
+    // Send OTP via WhatsApp automatically
+    let otpSent = false;
+    try {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL');
+      const otpResponse = await fetch(
+        `${supabaseUrl}/functions/v1/request_otp`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            phone: whatsappPhone,
+          }),
+        }
+      );
+
+      if (otpResponse.ok) {
+        const otpData = await otpResponse.json();
+        otpSent = otpData.success && otpData.whatsapp_sent;
+      }
+    } catch (otpError) {
+      console.error('Failed to send OTP after signup:', otpError);
+    }
+
     // Remove PIN from response
     const { pin: _, ...userResponse } = user;
 
     return new Response(
-      JSON.stringify({ user: userResponse, token }),
+      JSON.stringify({
+        user: userResponse,
+        token,
+        success: true,
+        message: otpSent
+          ? '✅ تم إنشاء الحساب بنجاح، وتم إرسال رمز التحقق عبر واتساب.'
+          : '✅ تم إنشاء الحساب بنجاح.',
+        otp_sent: otpSent,
+      }),
       { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
