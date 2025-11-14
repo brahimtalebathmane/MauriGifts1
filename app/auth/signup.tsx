@@ -66,19 +66,12 @@ export default function SignUpScreen() {
       );
 
       if (response.data) {
-        if (response.data.success && response.data.otp_sent) {
-          router.push({
-            pathname: '/auth/verify-otp',
-            params: {
-              phone: formData.phoneNumber,
-              token: response.data.token,
-              userId: response.data.user.id
-            }
-          });
-        } else {
-          setAuth(response.data.user, response.data.token);
-          router.replace('/(tabs)');
-        }
+        router.push({
+          pathname: '/auth/verify-otp',
+          params: {
+            phone: formData.phoneNumber
+          }
+        });
       } else {
         showErrorToast(response.error || t('errors.generic'));
       }
