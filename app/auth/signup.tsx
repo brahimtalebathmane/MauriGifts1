@@ -168,7 +168,7 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#0f0f16',
   },
   keyboardView: {
     flex: 1,
@@ -185,12 +185,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#2563EB',
+    color: '#f3f3f4',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 18,
-    color: '#6B7280',
+    color: '#9a9aa5',
   },
   formCard: {
     padding: 24,

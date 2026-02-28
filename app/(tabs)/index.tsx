@@ -151,18 +151,18 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#0f0f16',
   },
   header: {
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0f0f16',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#2a2a35',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#f3f3f4',
     textAlign: 'right',
   },
   content: {
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#374151',
+    color: '#f3f3f4',
     marginBottom: 16,
     textAlign: 'right',
   },
@@ -198,13 +198,13 @@ const styles = StyleSheet.create({
   categoryTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#0f0f16',
     marginBottom: 4,
     textAlign: 'right',
   },
   productCount: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#4a4a5a',
     textAlign: 'right',
   },
   emptyState: {
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#6B7280',
+    color: '#9a9aa5',
     textAlign: 'center',
   },
 });

@@ -184,18 +184,18 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#0f0f16',
   },
   header: {
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0f0f16',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#2a2a35',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#f3f3f4',
     textAlign: 'right',
   },
   content: {
@@ -213,12 +213,12 @@ const styles = StyleSheet.create({
   },
   orderDate: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#9a9aa5',
   },
   productName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#f3f3f4',
     marginBottom: 12,
     textAlign: 'right',
   },
@@ -233,15 +233,15 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#9a9aa5',
   },
   detailValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: '#f3f3f4',
   },
   codeContainer: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#1a1a25',
     padding: 12,
     borderRadius: 8,
     marginTop: 8,
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   codeLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: '#f3f3f4',
     marginBottom: 8,
     textAlign: 'right',
   },

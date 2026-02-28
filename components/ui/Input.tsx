@@ -40,7 +40,7 @@ const Input: React.FC<InputProps> = ({
           style={[styles.input, style]}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor="#7a7a85"
           {...props}
         />
         {rightIcon && <View style={styles.icon}>{rightIcon}</View>}
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
+    color: '#f3f3f4',
     marginBottom: 8,
     textAlign: 'right',
   },
@@ -65,13 +65,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#E5E7EB',
+    borderColor: '#2a2a35',
     borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1a1a25',
     paddingHorizontal: 16,
   },
   focused: {
-    borderColor: '#2563EB',
+    borderColor: '#f3f3f4',
   },
   error: {
     borderColor: '#DC2626',
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 16,
     fontSize: 16,
-    color: '#1F2937',
+    color: '#f3f3f4',
     textAlign: 'right',
   },
   icon: {

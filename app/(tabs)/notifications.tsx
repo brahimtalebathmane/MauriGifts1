@@ -183,13 +183,13 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#0f0f16',
   },
   header: {
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0f0f16',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#2a2a35',
   },
   headerRow: {
     flexDirection: 'row',
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#f3f3f4',
   },
   content: {
     flex: 1,
@@ -211,8 +211,8 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
   },
   unreadCard: {
-    borderLeftColor: '#2563EB',
-    backgroundColor: '#F8FAFC',
+    borderLeftColor: '#f3f3f4',
+    backgroundColor: '#1f1f2a',
   },
   notificationHeader: {
     flexDirection: 'row',
@@ -222,44 +222,44 @@ const styles = StyleSheet.create({
   },
   notificationTime: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#9a9aa5',
   },
   unreadDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#2563EB',
+    backgroundColor: '#f3f3f4',
   },
   notificationTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#f3f3f4',
     marginBottom: 4,
     textAlign: 'right',
   },
   notificationBody: {
     fontSize: 14,
-    color: '#4B5563',
+    color: '#c0c0ca',
     lineHeight: 20,
     textAlign: 'right',
   },
   codeContainer: {
     marginTop: 12,
     padding: 12,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#2a2a35',
     borderRadius: 8,
   },
   codeLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: '#f3f3f4',
     marginBottom: 4,
     textAlign: 'right',
   },
   codeText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2563EB',
+    color: '#f3f3f4',
     textAlign: 'center',
   },
   skeletonMargin: {

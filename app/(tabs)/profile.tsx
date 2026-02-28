@@ -264,18 +264,18 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#0f0f16',
   },
   header: {
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0f0f16',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#2a2a35',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#f3f3f4',
     textAlign: 'right',
   },
   content: {
@@ -292,13 +292,13 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#f3f3f4',
     marginBottom: 4,
   },
   profileRole: {
     fontSize: 16,
-    color: '#6B7280',
-    backgroundColor: '#F3F4F6',
+    color: '#f3f3f4',
+    backgroundColor: '#2a2a35',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 16,
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#f3f3f4',
     marginBottom: 16,
     textAlign: 'right',
   },
@@ -319,16 +319,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: '#2a2a35',
   },
   infoLabel: {
     fontSize: 16,
-    color: '#6B7280',
+    color: '#9a9aa5',
     fontWeight: '500',
   },
   infoValue: {
     fontSize: 16,
-    color: '#1F2937',
+    color: '#f3f3f4',
     fontWeight: '600',
   },
   actionButtons: {
@@ -350,26 +350,26 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: '#7a7a85',
     marginBottom: 4,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#0f0f16',
   },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0f0f16',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#2a2a35',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#f3f3f4',
     flex: 1,
     textAlign: 'right',
     marginRight: 16,
