@@ -5,22 +5,29 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "myapp",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
+    "icon": "https://i.postimg.cc/QdBvRCw7/oiljoilk.png",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "icon": "./assets/images/icon.png"
+      "bundleIdentifier": "com.mauriplay.app",
+      "icon": "https://i.postimg.cc/QdBvRCw7/oiljoilk.png"
+    },
+    "android": {
+      "package": "com.mauriplay.app",
+      "adaptiveIcon": {
+        "foregroundImage": "https://i.postimg.cc/QdBvRCw7/oiljoilk.png",
+        "backgroundColor": "#0f0f16"
+      }
     },
     "web": {
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "favicon": "https://i.postimg.cc/QdBvRCw7/oiljoilk.png"
     },
     "plugins": ["expo-router", "expo-font", "expo-web-browser"],
     "experiments": {
       "typedRoutes": true
-    },
-    "android": {
-      "package": "com.maurigift.app"
     }
   }
 }

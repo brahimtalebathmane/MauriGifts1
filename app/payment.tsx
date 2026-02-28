@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -282,16 +281,16 @@ export default function PaymentScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#0f0f16',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0f0f16',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#2a2a35',
   },
   backButton: {
     width: 40,
@@ -302,7 +301,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#f3f3f4',
     flex: 1,
     textAlign: 'right',
     marginRight: 16,
@@ -312,18 +311,18 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   bannerCard: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#f3f3f4',
     alignItems: 'center',
     marginBottom: 16,
   },
   bannerText: {
-    color: '#FFFFFF',
+    color: '#0f0f16',
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 8,
   },
   phoneNumber: {
-    color: '#FFFFFF',
+    color: '#0f0f16',
     fontSize: 24,
     fontWeight: 'bold',
     letterSpacing: 2,
@@ -335,12 +334,12 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#f3f3f4',
   },
   productPrice: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#2563EB',
+    color: '#f3f3f4',
     marginTop: 4,
   },
   methodCard: {
@@ -349,7 +348,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#374151',
+    color: '#f3f3f4',
     marginBottom: 16,
     textAlign: 'right',
   },
@@ -367,8 +366,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   selectedMethod: {
-    borderColor: '#2563EB',
-    backgroundColor: '#F0F9FF',
+    borderColor: '#f3f3f4',
+    backgroundColor: '#1f1f2a',
   },
   methodLogo: {
     width: 60,
@@ -378,7 +377,7 @@ const styles = StyleSheet.create({
   methodName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: '#f3f3f4',
     textAlign: 'center',
   },
   infoCard: {
@@ -392,7 +391,7 @@ const styles = StyleSheet.create({
   },
   disclaimer: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#9a9aa5',
     textAlign: 'center',
     lineHeight: 20,
   },

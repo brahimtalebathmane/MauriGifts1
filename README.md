@@ -1,170 +1,126 @@
-# MauriGift - Gift Card Mobile Application
+# MAURIPLAY
 
-تطبيق MauriGift هو منصة شراء بطاقات الهدايا الرقمية مع دعم كامل للغة العربية ونظام RTL.
+A React Native gaming platform built with Expo for managing game top-ups and digital purchases with full Arabic support.
 
-## المتطلبات
+## Features
 
-- Node.js 18+
-- Expo CLI
-- حساب Supabase
-- هاتف ذكي أو محاكي للتطوير
+- Multi-game support (PUBG, Free Fire, iTunes, PlayStation, etc.)
+- Secure payment processing
+- Real-time order tracking
+- Admin dashboard
+- Arabic RTL interface
+- Dark theme UI (#0f0f16 / #f3f3f4)
 
-## الإعداد السريع
+## Tech Stack
 
-### 1. إعداد Supabase
+- React Native with Expo SDK 54
+- Expo Router for navigation
+- Supabase for backend
+- TypeScript
+- Zustand for state management
+- Lucide React Native for icons
 
-1. أنشئ مشروع جديد على [Supabase](https://supabase.com)
-2. انسخ `SUPABASE_URL` و `SUPABASE_ANON_KEY` و `SUPABASE_SERVICE_ROLE_KEY`
-3. أنشئ ملف `.env` وأضف المتغيرات:
+## Quick Start
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Environment Setup
+
+Create a `.env` file:
 
 ```env
-EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
+EXPO_PUBLIC_SUPABASE_URL=https://gyuicmqdtxjyomkiydmc.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
-### 2. إعداد قاعدة البيانات
+### 3. Run Development Server
 
 ```bash
-# تشغيل المايجريشن
-supabase db reset
-# أو
-supabase db push
+npm run dev
 ```
 
-### 3. إنشاء مجلد التخزين
-
-في لوحة تحكم Supabase:
-1. اذهب إلى Storage
-2. أنشئ bucket جديد باسم `receipts`
-3. اجعله Private
-
-### 4. نشر Edge Functions
+### 4. Build for Production
 
 ```bash
-supabase functions deploy signup --project-ref your-project-ref
-supabase functions deploy login --project-ref your-project-ref
-supabase functions deploy me --project-ref your-project-ref
-supabase functions deploy list_products --project-ref your-project-ref
-supabase functions deploy create_order --project-ref your-project-ref
-supabase functions deploy upload_receipt --project-ref your-project-ref
-supabase functions deploy my_orders --project-ref your-project-ref
-supabase functions deploy admin_list_users --project-ref your-project-ref
-supabase functions deploy admin_list_orders --project-ref your-project-ref
-supabase functions deploy admin_approve_order --project-ref your-project-ref
-supabase functions deploy admin_reject_order --project-ref your-project-ref
-supabase functions deploy notifications --project-ref your-project-ref
+# Web build
+npm run build:web
 ```
 
-### 5. تشغيل التطبيق
+## Deployment
 
-```bash
-# تثبيت التبعيات
-npm install
+### Expo Go
+1. Run `npm run dev`
+2. Scan QR code with Expo Go app
 
-# تشغيل التطبيق
-expo start
-```
+### Netlify (Web)
+1. Build: `npm run build:web`
+2. Deploy `dist` folder
+3. Set environment variables in Netlify dashboard
 
-## حسابات التجربة
-
-### المدير
-- رقم الهاتف: `00000000`
-- الرمز: `1234`
-
-يمكنك إنشاء حسابات مستخدمين جديدة من خلال شاشة التسجيل.
-
-## الميزات الأساسية
-
-### للمستخدمين
-- التسجيل بالهاتف ورمز PIN
-- تصفح فئات المنتجات (PUBG, Free Fire, iTunes, PlayStation)
-- شراء بطاقات الهدايا
-- طرق دفع متعددة (بنكيلي، السداد، مصرفي، بيم بنك، أمانتي، كليك)
-- رفع إيصال الدفع
-- متابعة حالة الطلبات
-- استلام أكواد الشحن
-- نظام الإشعارات
-
-### للمديرين
-- لوحة تحكم شاملة
-- إدارة المستخدمين
-- إدارة الطلبات
-- تأكيد أو رفض الطلبات
-- إرسال أكواد الشحن
-- سجل العمليات
-
-## التقنيات المستخدمة
-
-- **Frontend**: Expo (React Native + TypeScript)
-- **Backend**: Supabase (Postgres + Edge Functions + Storage)
-- **State Management**: Zustand
-- **UI Components**: Custom RTL components
-- **Authentication**: Custom session management
-- **Internationalization**: Arabic with RTL support
-- **Image Handling**: Expo Image Picker + Manipulator
-- **Notifications**: Local notifications
-
-## هيكل المشروع
+## Project Structure
 
 ```
-├── app/                    # Expo Router screens
-│   ├── (tabs)/            # Tab navigation screens
-│   ├── auth/              # Authentication screens
-│   ├── category/          # Category screens
-│   └── payment/           # Payment flow
-├── components/            # Reusable UI components
-├── lib/                   # API client and utilities
-├── state/                 # Zustand store
-├── hooks/                 # Custom hooks
-├── i18n/                  # Arabic translations
-└── supabase/             # Database and functions
-    ├── migrations/       # SQL migrations
-    └── functions/        # Edge Functions
+app/
+├── (tabs)/           # Main app screens (Home, Orders, Profile, Notifications)
+│   └── admin/       # Admin panel screens
+├── auth/            # Authentication (Login, Signup, OTP)
+├── category/        # Category detail screens
+├── payment.tsx      # Payment flow
+└── index.tsx        # Entry/splash screen
+
+src/
+├── components/      # Reusable UI components
+│   ├── ui/         # Button, Card, Input, etc.
+│   ├── common/     # StatusChip, etc.
+│   └── forms/      # ImagePicker, etc.
+├── services/       # API services
+├── types/          # TypeScript types
+├── utils/          # Utility functions
+├── hooks/          # Custom hooks
+└── config/         # Configuration
+
+supabase/
+├── migrations/     # Database migrations
+└── functions/      # Edge functions
 ```
 
-## API Endpoints
+## Admin Access
 
-جميع الـ Edge Functions تدعم CORS وتستخدم Zod للتحقق من البيانات:
+- Phone: `00000000`
+- PIN: `1234`
 
-- `POST /signup` - إنشاء حساب جديد
-- `POST /login` - تسجيل الدخول
-- `POST /me` - جلب بيانات المستخدم
-- `GET /list_products` - جلب المنتجات
-- `POST /create_order` - إنشاء طلب جديد
-- `POST /upload_receipt` - رفع إيصال الدفع
-- `POST /my_orders` - جلب طلبات المستخدم
-- `POST /admin_list_users` - إدارة المستخدمين
-- `POST /admin_list_orders` - إدارة الطلبات
-- `POST /admin_approve_order` - تأكيد الطلب
-- `POST /admin_reject_order` - رفض الطلب
-- `POST /notifications` - إدارة الإشعارات
+## User Features
 
-## الأمان
+- Phone + PIN authentication
+- Browse game categories
+- Purchase game credits
+- Multiple payment methods
+- Upload payment receipts
+- Track order status
+- Receive delivery codes
+- Notifications system
 
-- استخدام Service Role Key في Edge Functions فقط
-- تشفير جميع الاتصالات عبر HTTPS
-- تخزين آمن للجلسات
-- التحقق من صحة البيانات في الخادم
-- إدارة أذونات Storage بعناية
+## Admin Features
 
-## التطوير والاختبار
+- User management
+- Order management
+- Approve/reject orders
+- Send delivery codes
+- Activity logs
+- Payment method configuration
+- Product/category management
 
-```bash
-# تشغيل في وضع التطوير
-expo start
+## Color Theme
 
-# بناء للإنتاج
-expo build
+- Primary Background: `#0f0f16`
+- Secondary Text: `#f3f3f4`
+- Card Background: `#1a1a25`
+- Border Color: `#2a2a35`
 
-# اختبار على الهاتف
-expo start --tunnel
-```
+## License
 
-## الدعم
-
-للمساعدة أو الاستفسارات، يرجى التواصل عبر فريق التطوير.
-
----
-
-تم تطوير MauriGift بواسطة فريق متخصص لخدمة السوق الموريتاني 🇲🇷
+Private - All rights reserved
