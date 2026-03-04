@@ -1,36 +1,47 @@
 import { create } from 'zustand';
-import { storage } from '../src/utils/storage';
+import { storage } from '../utils/storage';
 import type { User, Product, Order, Notification, Category } from '@/src/types';
-import { STORAGE_KEYS } from '../src/config';
-import { apiService } from '../src/services/api';
+import { STORAGE_KEYS } from '../config';
+import { apiService } from '../services/api';
 
 interface AppState {
+  // Auth
   user: User | null;
   token: string | null;
   isLoading: boolean;
-
+  
+  // Products
   products: Record<string, Product[]>;
+  
+  // Orders
   orders: Order[];
+  
+  // Notifications
   notifications: Notification[];
   unreadCount: number;
-  categories: Category[];
 
+  // Categories
+  categories: Category[];
+  
+  // Actions
   setAuth: (user: User | null, token: string | null) => void;
   setProducts: (products: Record<string, Product[]>) => void;
   setCategories: (categories: Category[]) => void;
   setOrders: (orders: Order[]) => void;
   setNotifications: (notifications: Notification[]) => void;
   setLoading: (loading: boolean) => void;
-  logout: () => Promise<void>;
+  logout: () => void;
   refreshData: () => Promise<void>;
   refreshProducts: () => Promise<boolean>;
   refreshCategories: () => Promise<boolean>;
-
+  
+  // Persistence
   loadFromStorage: () => Promise<void>;
   saveToStorage: () => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
+  // Initial state
   user: null,
   token: null,
   isLoading: true,
@@ -40,13 +51,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   categories: [],
   unreadCount: 0,
 
+  // Actions
   setAuth: (user, token) => {
     set({ user, token });
     get().saveToStorage();
   },
 
   setProducts: (products) => set({ products }),
+
   setCategories: (categories) => set({ categories }),
+
   setOrders: (orders) => set({ orders }),
 
   setNotifications: (notifications) => {
@@ -59,18 +73,23 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (!state.token) return;
 
     try {
+      console.log('Refreshing global data...');
       const [productsResponse, categoriesResponse] = await Promise.all([
         apiService.getProducts(),
         apiService.getCategories(),
       ]);
-
+      
       if (productsResponse.data) {
+        console.log('Updated products in store:', Object.keys(productsResponse.data.products || {}).length, 'categories');
         set({ products: productsResponse.data.products || {} });
       }
-
+      
       if (categoriesResponse.data) {
+        console.log('Updated categories in store:', (categoriesResponse.data.categories || []).length, 'categories');
         set({ categories: categoriesResponse.data.categories || [] });
       }
+      
+      console.log('Global data refresh completed successfully');
     } catch (error) {
       console.error('Error refreshing data:', error);
     }
@@ -78,8 +97,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   refreshProducts: async () => {
     try {
+      console.log('Refreshing products...');
       const response = await apiService.getProducts();
       if (response.data) {
+        console.log('Products refreshed:', Object.keys(response.data.products || {}).length, 'categories');
         set({ products: response.data.products || {} });
         return true;
       }
@@ -92,8 +113,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   refreshCategories: async () => {
     try {
+      console.log('Refreshing categories...');
       const response = await apiService.getCategories();
       if (response.data) {
+        console.log('Categories refreshed:', (response.data.categories || []).length, 'categories');
         set({ categories: response.data.categories || [] });
         return true;
       }
@@ -106,52 +129,39 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setLoading: (isLoading) => set({ isLoading }),
 
-  // ✅ تسجيل الخروج المصحح للويب + الموبايل
   logout: async () => {
-    try {
-      // مسح التخزين
-      await Promise.all([
-        storage.removeItem(STORAGE_KEYS.user),
-        storage.removeItem(STORAGE_KEYS.token),
-      ]);
-
-      // تنظيف إضافي للويب
-      if (typeof window !== 'undefined') {
-        localStorage.clear();
-      }
-
-    } catch (error) {
-      console.error('Error clearing storage:', error);
-    }
-
-    // تصفير الحالة
-    set({
-      user: null,
-      token: null,
+    set({ 
+      user: null, 
+      token: null, 
       orders: [],
       notifications: [],
       categories: [],
       unreadCount: 0,
       products: {},
-      isLoading: false,
+      isLoading: false
     });
-
-    // 👇 إعادة تحميل الصفحة في الويب لضمان تنظيف كامل
-    if (typeof window !== 'undefined') {
-      window.location.href = '/';
+    
+    try {
+      await Promise.all([
+        storage.removeItem(STORAGE_KEYS.user),
+        storage.removeItem(STORAGE_KEYS.token),
+      ]);
+    } catch (error) {
+      console.error('Error clearing storage:', error);
     }
   },
 
+  // Persistence
   loadFromStorage: async () => {
     try {
       const [userStr, tokenStr] = await Promise.all([
         storage.getItem(STORAGE_KEYS.user),
         storage.getItem(STORAGE_KEYS.token),
       ]);
-
+      
       const user = userStr ? JSON.parse(userStr) : null;
       const token = tokenStr || null;
-
+      
       set({ user, token, isLoading: false });
     } catch (error) {
       console.error('Error loading from storage:', error);
@@ -162,11 +172,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   saveToStorage: async () => {
     try {
       const { user, token } = get();
-
+      
       if (user) {
         await storage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
       }
-
       if (token) {
         await storage.setItem(STORAGE_KEYS.token, token);
       }
