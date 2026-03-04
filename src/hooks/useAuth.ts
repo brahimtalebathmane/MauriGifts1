@@ -11,7 +11,6 @@ export const useAuth = () => {
   const login = useCallback(async (phoneNumber: string, pin: string) => {
     try {
       const response = await apiService.login(phoneNumber, pin);
-      
       if (response.data) {
         setAuth(response.data.user, response.data.token);
         router.replace(ROUTES.main.home);
@@ -30,7 +29,6 @@ export const useAuth = () => {
   const signup = useCallback(async (name: string, phoneNumber: string, pin: string) => {
     try {
       const response = await apiService.signup(name, phoneNumber, pin);
-      
       if (response.data) {
         setAuth(response.data.user, response.data.token);
         router.replace(ROUTES.main.home);
@@ -49,8 +47,13 @@ export const useAuth = () => {
   const logout = useCallback(async () => {
     try {
       await storeLogout();
-      router.replace(ROUTES.auth.login);
-      showSuccessToast('تم تسجيل الخروج بنجاح');
+
+      // على Native: إعادة التوجيه عبر router
+      if (typeof window === 'undefined') {
+        router.replace(ROUTES.auth.login);
+        showSuccessToast('تم تسجيل الخروج بنجاح');
+      }
+
     } catch (error) {
       console.error('Logout error:', error);
     }
