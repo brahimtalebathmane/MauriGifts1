@@ -1,10 +1,10 @@
+// state/store.ts
 import { create } from 'zustand';
 import { storage } from '../src/utils/storage';
 import type { User, Product, Order, Notification, Category } from '@/src/types';
 import { STORAGE_KEYS } from '../src/config';
 import { apiService } from '../src/services/api';
 import { supabase } from '../lib/supabase-client';
-import { router } from 'expo-router';
 
 interface AppState {
   user: User | null;
@@ -101,6 +101,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   logout: async () => {
+    // مسح الـ state الداخلي
     set({ 
       user: null, 
       token: null, 
@@ -113,6 +114,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
 
     try {
+      // مسح التخزين المحلي
       await Promise.all([
         storage.removeItem(STORAGE_KEYS.user),
         storage.removeItem(STORAGE_KEYS.token),
@@ -124,13 +126,12 @@ export const useAppStore = create<AppState>((set, get) => ({
         console.error('Supabase logout error', err);
       }
 
-      // إعادة التوجيه بطريقة متوافقة
+      // Web: إعادة تحميل الصفحة لتحديث واجهة المستخدم
       if (typeof window !== 'undefined') {
-        // على الويب
-        window.location.assign('/auth/login');
-      } else {
-        // على mobile (Expo Router)
-        router.replace('/auth/login');
+        // إذا كنت تريد إعادة توجيه مباشرة لصفحة login:
+        window.location.href = '/auth/login';
+        // بدلاً من ذلك، إذا تريد تحديث الصفحة الحالية:
+        // window.location.reload();
       }
 
     } catch (error) {
