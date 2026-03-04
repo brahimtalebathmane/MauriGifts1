@@ -1,8 +1,8 @@
 import { create } from 'zustand';
-import { storage } from '../utils/storage';
+import { storage } from '../src/utils/storage';
 import type { User, Product, Order, Notification, Category } from '@/src/types';
-import { STORAGE_KEYS } from '../config';
-import { apiService } from '../services/api';
+import { STORAGE_KEYS } from '../src/config';
+import { apiService } from '../src/services/api';
 
 interface AppState {
   // Auth
