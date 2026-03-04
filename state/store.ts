@@ -106,25 +106,25 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setLoading: (isLoading) => set({ isLoading }),
 
-  // ✅ النسخة المصححة من logout (تحل مشكلة الويب)
+  // ✅ تسجيل الخروج المصحح للويب + الموبايل
   logout: async () => {
     try {
-      // أولاً: امسح التخزين
+      // مسح التخزين
       await Promise.all([
         storage.removeItem(STORAGE_KEYS.user),
         storage.removeItem(STORAGE_KEYS.token),
       ]);
 
-      // تأكيد إضافي للويب
+      // تنظيف إضافي للويب
       if (typeof window !== 'undefined') {
-        localStorage.removeItem(STORAGE_KEYS.user);
-        localStorage.removeItem(STORAGE_KEYS.token);
+        localStorage.clear();
       }
+
     } catch (error) {
       console.error('Error clearing storage:', error);
     }
 
-    // ثم صفّر الحالة
+    // تصفير الحالة
     set({
       user: null,
       token: null,
@@ -135,6 +135,11 @@ export const useAppStore = create<AppState>((set, get) => ({
       products: {},
       isLoading: false,
     });
+
+    // 👇 إعادة تحميل الصفحة في الويب لضمان تنظيف كامل
+    if (typeof window !== 'undefined') {
+      window.location.href = '/';
+    }
   },
 
   loadFromStorage: async () => {
@@ -161,6 +166,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (user) {
         await storage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
       }
+
       if (token) {
         await storage.setItem(STORAGE_KEYS.token, token);
       }
