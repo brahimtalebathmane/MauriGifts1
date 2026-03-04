@@ -3,7 +3,7 @@ import { storage } from '../src/utils/storage';
 import type { User, Product, Order, Notification, Category } from '@/src/types';
 import { STORAGE_KEYS } from '../src/config';
 import { apiService } from '../src/services/api';
-import { supabase } from '../src/lib/supabase-client';
+import { supabase } from '../lib/supabase-client';
 
 interface AppState {
   user: User | null;
