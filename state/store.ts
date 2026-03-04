@@ -1,4 +1,3 @@
-// state/store.ts
 import { create } from 'zustand';
 import { storage } from '../src/utils/storage';
 import type { User, Product, Order, Notification, Category } from '@/src/types';
@@ -101,7 +100,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   logout: async () => {
-    // مسح الـ state الداخلي
     set({ 
       user: null, 
       token: null, 
@@ -114,26 +112,24 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
 
     try {
-      // مسح التخزين المحلي
       await Promise.all([
         storage.removeItem(STORAGE_KEYS.user),
         storage.removeItem(STORAGE_KEYS.token),
       ]);
 
-      try {
-        await supabase.auth.signOut();
-      } catch (err) {
-        console.error('Supabase logout error', err);
-      }
-
-      // Web: إعادة تحميل الصفحة لتحديث واجهة المستخدم
       if (typeof window !== 'undefined') {
-        // إذا كنت تريد إعادة توجيه مباشرة لصفحة login:
-        window.location.href = '/auth/login';
-        // بدلاً من ذلك، إذا تريد تحديث الصفحة الحالية:
-        // window.location.reload();
-      }
+        window.localStorage.clear(); // امسح كل localStorage
 
+        try {
+          const { error } = await supabase.auth.signOut();
+          if (error) console.error('Supabase logout error', error.message);
+        } catch (err) {
+          console.error('Supabase logout exception', err);
+        }
+
+        // إعادة توجيه بدون الرجوع للخلف
+        window.location.replace('/auth/login');
+      }
     } catch (error) {
       console.error('Error clearing storage:', error);
     }
