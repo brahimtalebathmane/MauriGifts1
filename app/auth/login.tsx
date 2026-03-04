@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 
 export default function LoginScreen() {
-  const { setAuth } = useAppStore();
+  const { user, token, setAuth } = useAppStore();
   const { t } = useI18n();
   const [formData, setFormData] = useState({
     phoneNumber: '',
@@ -27,6 +27,13 @@ export default function LoginScreen() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+
+  // ✅ تعديل مهم: إعادة التوجيه فقط إذا user و token موجودان
+  useEffect(() => {
+    if (user && token) {
+      router.replace('/(tabs)');
+    }
+  }, [user, token]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -53,7 +60,7 @@ export default function LoginScreen() {
 
       if (response.data) {
         setAuth(response.data.user, response.data.token);
-        router.replace('/(tabs)');
+        // لا حاجة لإعادة التوجيه هنا، useEffect سيتكفل بذلك
       } else {
         showErrorToast(response.error || t('errors.invalid_credentials'));
       }
