@@ -12,7 +12,6 @@ import { router } from 'expo-router';
 import { useAppStore } from '@/state/store';
 import { apiService } from '../../src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import { formatPhoneNumber } from '../../src/utils/formatters';
 import { showSuccessToast, showErrorToast } from '../../src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -31,6 +30,7 @@ export default function ProfileScreen() {
   });
   const [pinLoading, setPinLoading] = useState(false);
 
+  // 🔥 FIXED LOGOUT
   const handleLogout = () => {
     Alert.alert(
       'تسجيل الخروج',
@@ -41,8 +41,21 @@ export default function ProfileScreen() {
           text: 'تسجيل خروج',
           style: 'destructive',
           onPress: async () => {
-            await logout();
-            router.replace('/auth/login');
+            try {
+              await logout();
+
+              if (typeof window !== 'undefined') {
+                // Web
+                window.localStorage.clear();
+                window.sessionStorage.clear();
+                window.location.replace('/auth/login');
+              } else {
+                // Mobile
+                router.replace('/auth/login');
+              }
+            } catch (error) {
+              console.error('Logout error:', error);
+            }
           },
         },
       ]
@@ -50,7 +63,6 @@ export default function ProfileScreen() {
   };
 
   const handleSave = () => {
-    // In a real app, you would update the user's name via API
     showSuccessToast(t('profile.saved'));
     setEditing(false);
   };
@@ -70,8 +82,12 @@ export default function ProfileScreen() {
 
     setPinLoading(true);
     try {
-      const response = await apiService.changePin(token, pinData.currentPin, pinData.newPin);
-      
+      const response = await apiService.changePin(
+        token,
+        pinData.currentPin,
+        pinData.newPin
+      );
+
       if (response.data) {
         showSuccessToast('تم تغيير الرمز بنجاح');
         setChangePinModal(false);
@@ -109,7 +125,7 @@ export default function ProfileScreen() {
 
         <Card style={styles.infoCard}>
           <Text style={styles.cardTitle}>المعلومات الشخصية</Text>
-          
+
           {editing ? (
             <Input
               label={t('auth.name')}
@@ -126,16 +142,11 @@ export default function ProfileScreen() {
 
           <View style={styles.infoRow}>
             <Text style={styles.infoValue}>
-              {user?.phone_number ? formatPhoneNumber(user.phone_number) : ''}
+              {user?.phone_number
+                ? formatPhoneNumber(user.phone_number)
+                : ''}
             </Text>
             <Text style={styles.infoLabel}>{t('profile.phone')}:</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.infoValue}>
-              {user?.role === 'admin' ? 'مدير' : 'مستخدم'}
-            </Text>
-            <Text style={styles.infoLabel}>{t('profile.role')}:</Text>
           </View>
 
           <View style={styles.actionButtons}>
@@ -168,7 +179,7 @@ export default function ProfileScreen() {
 
         <Card style={styles.infoCard}>
           <Text style={styles.cardTitle}>الإعدادات</Text>
-          
+
           <Button
             title={t('profile.change_pin')}
             variant="outline"
@@ -183,44 +194,22 @@ export default function ProfileScreen() {
             style={styles.settingButton}
           />
         </Card>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            {t('app.name')} - إصدار 1.0.0
-          </Text>
-          <Text style={styles.footerText}>
-            تم الانضمام في {new Date(user?.created_at || '').toLocaleDateString('ar-SA')}
-          </Text>
-        </View>
       </ScrollView>
 
-      {/* Change PIN Modal */}
       <Modal
         visible={changePinModal}
         animationType="slide"
         presentationStyle="pageSheet"
       >
         <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Button
-              title="إلغاء"
-              onPress={() => {
-                setChangePinModal(false);
-                setPinData({ currentPin: '', newPin: '', confirmPin: '' });
-              }}
-              variant="outline"
-              size="small"
-            />
-            <Text style={styles.modalTitle}>تغيير الرمز</Text>
-          </View>
-
           <ScrollView style={styles.modalContent}>
             <Card style={styles.modalCard}>
               <Input
                 label="الرمز الحالي"
                 value={pinData.currentPin}
-                onChangeText={(value) => setPinData(prev => ({ ...prev, currentPin: value }))}
-                placeholder="أدخل الرمز الحالي"
+                onChangeText={(value) =>
+                  setPinData((prev) => ({ ...prev, currentPin: value }))
+                }
                 keyboardType="number-pad"
                 maxLength={4}
                 secureTextEntry
@@ -229,8 +218,9 @@ export default function ProfileScreen() {
               <Input
                 label="الرمز الجديد"
                 value={pinData.newPin}
-                onChangeText={(value) => setPinData(prev => ({ ...prev, newPin: value }))}
-                placeholder="أدخل الرمز الجديد"
+                onChangeText={(value) =>
+                  setPinData((prev) => ({ ...prev, newPin: value }))
+                }
                 keyboardType="number-pad"
                 maxLength={4}
                 secureTextEntry
@@ -239,8 +229,9 @@ export default function ProfileScreen() {
               <Input
                 label="تأكيد الرمز الجديد"
                 value={pinData.confirmPin}
-                onChangeText={(value) => setPinData(prev => ({ ...prev, confirmPin: value }))}
-                placeholder="أعد إدخال الرمز الجديد"
+                onChangeText={(value) =>
+                  setPinData((prev) => ({ ...prev, confirmPin: value }))
+                }
                 keyboardType="number-pad"
                 maxLength={4}
                 secureTextEntry
@@ -250,7 +241,11 @@ export default function ProfileScreen() {
                 title="تغيير الرمز"
                 onPress={handleChangePin}
                 loading={pinLoading}
-                disabled={!pinData.currentPin || !pinData.newPin || !pinData.confirmPin}
+                disabled={
+                  !pinData.currentPin ||
+                  !pinData.newPin ||
+                  !pinData.confirmPin
+                }
                 style={styles.changePinButton}
               />
             </Card>
@@ -262,13 +257,9 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f0f16',
-  },
+  container: { flex: 1, backgroundColor: '#0f0f16' },
   header: {
     padding: 20,
-    backgroundColor: '#0f0f16',
     borderBottomWidth: 1,
     borderBottomColor: '#2a2a35',
   },
@@ -278,22 +269,13 @@ const styles = StyleSheet.create({
     color: '#f3f3f4',
     textAlign: 'right',
   },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  profileCard: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  profileHeader: {
-    alignItems: 'center',
-  },
+  content: { flex: 1, padding: 16 },
+  profileCard: { alignItems: 'center', marginBottom: 16 },
+  profileHeader: { alignItems: 'center' },
   profileName: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#f3f3f4',
-    marginBottom: 4,
   },
   profileRole: {
     fontSize: 16,
@@ -303,9 +285,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 16,
   },
-  infoCard: {
-    marginBottom: 16,
-  },
+  infoCard: { marginBottom: 16 },
   cardTitle: {
     fontSize: 18,
     fontWeight: '600',
@@ -316,72 +296,18 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#2a2a35',
   },
-  infoLabel: {
-    fontSize: 16,
-    color: '#9a9aa5',
-    fontWeight: '500',
-  },
-  infoValue: {
-    fontSize: 16,
-    color: '#f3f3f4',
-    fontWeight: '600',
-  },
-  actionButtons: {
-    marginTop: 16,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  button: {
-    flex: 1,
-  },
-  settingButton: {
-    marginBottom: 12,
-  },
-  footer: {
-    alignItems: 'center',
-    padding: 20,
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#7a7a85',
-    marginBottom: 4,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: '#0f0f16',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 20,
-    backgroundColor: '#0f0f16',
-    borderBottomWidth: 1,
-    borderBottomColor: '#2a2a35',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#f3f3f4',
-    flex: 1,
-    textAlign: 'right',
-    marginRight: 16,
-  },
-  modalContent: {
-    flex: 1,
-    padding: 16,
-  },
-  modalCard: {
-    marginBottom: 16,
-  },
-  changePinButton: {
-    marginTop: 16,
-  },
+  infoLabel: { color: '#9a9aa5' },
+  infoValue: { color: '#f3f3f4' },
+  actionButtons: { marginTop: 16 },
+  buttonRow: { flexDirection: 'row', gap: 12 },
+  button: { flex: 1 },
+  settingButton: { marginBottom: 12 },
+  modalContainer: { flex: 1, backgroundColor: '#0f0f16' },
+  modalContent: { flex: 1, padding: 16 },
+  modalCard: { marginBottom: 16 },
+  changePinButton: { marginTop: 16 },
 });
