@@ -1,40 +1,177 @@
-import * as SecureStore from 'expo-secure-store';
-import { Platform } from 'react-native';
+import { create } from 'zustand';
+import { storage } from '../src/utils/storage';
+import type { User, Product, Order, Notification, Category } from '@/src/types';
+import { STORAGE_KEYS } from '../src/config';
+import { apiService } from '../src/services/api';
 
-export const storage = {
-  async getItem(key: string): Promise<string | null> {
+interface AppState {
+  user: User | null;
+  token: string | null;
+  isLoading: boolean;
+
+  products: Record<string, Product[]>;
+  orders: Order[];
+  notifications: Notification[];
+  unreadCount: number;
+  categories: Category[];
+
+  setAuth: (user: User | null, token: string | null) => void;
+  setProducts: (products: Record<string, Product[]>) => void;
+  setCategories: (categories: Category[]) => void;
+  setOrders: (orders: Order[]) => void;
+  setNotifications: (notifications: Notification[]) => void;
+  setLoading: (loading: boolean) => void;
+  logout: () => Promise<void>;
+  refreshData: () => Promise<void>;
+  refreshProducts: () => Promise<boolean>;
+  refreshCategories: () => Promise<boolean>;
+
+  loadFromStorage: () => Promise<void>;
+  saveToStorage: () => Promise<void>;
+}
+
+export const useAppStore = create<AppState>((set, get) => ({
+  user: null,
+  token: null,
+  isLoading: true,
+  products: {},
+  orders: [],
+  notifications: [],
+  categories: [],
+  unreadCount: 0,
+
+  setAuth: (user, token) => {
+    set({ user, token });
+    get().saveToStorage();
+  },
+
+  setProducts: (products) => set({ products }),
+  setCategories: (categories) => set({ categories }),
+  setOrders: (orders) => set({ orders }),
+
+  setNotifications: (notifications) => {
+    const unreadCount = notifications.filter(n => !n.seen).length;
+    set({ notifications, unreadCount });
+  },
+
+  refreshData: async () => {
+    const state = get();
+    if (!state.token) return;
+
     try {
-      if (Platform.OS === 'web') {
-        return localStorage.getItem(key);
+      const [productsResponse, categoriesResponse] = await Promise.all([
+        apiService.getProducts(),
+        apiService.getCategories(),
+      ]);
+
+      if (productsResponse.data) {
+        set({ products: productsResponse.data.products || {} });
       }
-      return await SecureStore.getItemAsync(key);
+
+      if (categoriesResponse.data) {
+        set({ categories: categoriesResponse.data.categories || [] });
+      }
     } catch (error) {
-      console.error(`Error getting item ${key}:`, error);
-      return null;
+      console.error('Error refreshing data:', error);
     }
   },
-  
-  async setItem(key: string, value: string): Promise<void> {
+
+  refreshProducts: async () => {
     try {
-      if (Platform.OS === 'web') {
-        localStorage.setItem(key, value);
-      } else {
-        await SecureStore.setItemAsync(key, value);
+      const response = await apiService.getProducts();
+      if (response.data) {
+        set({ products: response.data.products || {} });
+        return true;
       }
+      return false;
     } catch (error) {
-      console.error(`Error setting item ${key}:`, error);
+      console.error('Error refreshing products:', error);
+      return false;
     }
   },
-  
-  async removeItem(key: string): Promise<void> {
+
+  refreshCategories: async () => {
     try {
-      if (Platform.OS === 'web') {
-        localStorage.removeItem(key);
-      } else {
-        await SecureStore.deleteItemAsync(key);
+      const response = await apiService.getCategories();
+      if (response.data) {
+        set({ categories: response.data.categories || [] });
+        return true;
       }
+      return false;
     } catch (error) {
-      console.error(`Error removing item ${key}:`, error);
+      console.error('Error refreshing categories:', error);
+      return false;
     }
   },
-};
+
+  setLoading: (isLoading) => set({ isLoading }),
+
+  // ✅ تسجيل الخروج المصحح للويب + الموبايل
+  logout: async () => {
+    try {
+      // مسح التخزين
+      await Promise.all([
+        storage.removeItem(STORAGE_KEYS.user),
+        storage.removeItem(STORAGE_KEYS.token),
+      ]);
+
+      // تنظيف إضافي للويب
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+      }
+
+    } catch (error) {
+      console.error('Error clearing storage:', error);
+    }
+
+    // تصفير الحالة
+    set({
+      user: null,
+      token: null,
+      orders: [],
+      notifications: [],
+      categories: [],
+      unreadCount: 0,
+      products: {},
+      isLoading: false,
+    });
+
+    // 👇 إعادة تحميل الصفحة في الويب لضمان تنظيف كامل
+    if (typeof window !== 'undefined') {
+      window.location.href = '/';
+    }
+  },
+
+  loadFromStorage: async () => {
+    try {
+      const [userStr, tokenStr] = await Promise.all([
+        storage.getItem(STORAGE_KEYS.user),
+        storage.getItem(STORAGE_KEYS.token),
+      ]);
+
+      const user = userStr ? JSON.parse(userStr) : null;
+      const token = tokenStr || null;
+
+      set({ user, token, isLoading: false });
+    } catch (error) {
+      console.error('Error loading from storage:', error);
+      set({ isLoading: false });
+    }
+  },
+
+  saveToStorage: async () => {
+    try {
+      const { user, token } = get();
+
+      if (user) {
+        await storage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
+      }
+
+      if (token) {
+        await storage.setItem(STORAGE_KEYS.token, token);
+      }
+    } catch (error) {
+      console.error('Error saving to storage:', error);
+    }
+  },
+}));
