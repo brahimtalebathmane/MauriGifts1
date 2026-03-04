@@ -4,7 +4,7 @@ import type { User, Product, Order, Notification, Category } from '@/src/types';
 import { STORAGE_KEYS } from '../src/config';
 import { apiService } from '../src/services/api';
 import { supabase } from '../lib/supabase-client';
-import { router } from 'expo-router'; // <- أضف هذا
+import { router } from 'expo-router';
 
 interface AppState {
   user: User | null;
@@ -124,8 +124,14 @@ export const useAppStore = create<AppState>((set, get) => ({
         console.error('Supabase logout error', err);
       }
 
-      // استخدم Expo Router لإعادة التوجيه
-      router.replace('/auth/login');
+      // إعادة التوجيه بطريقة متوافقة
+      if (typeof window !== 'undefined') {
+        // على الويب
+        window.location.assign('/auth/login');
+      } else {
+        // على mobile (Expo Router)
+        router.replace('/auth/login');
+      }
 
     } catch (error) {
       console.error('Error clearing storage:', error);
