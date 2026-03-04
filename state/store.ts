@@ -4,6 +4,7 @@ import type { User, Product, Order, Notification, Category } from '@/src/types';
 import { STORAGE_KEYS } from '../src/config';
 import { apiService } from '../src/services/api';
 import { supabase } from '../lib/supabase-client';
+import { router } from 'expo-router'; // <- أضف هذا
 
 interface AppState {
   user: User | null;
@@ -100,7 +101,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   logout: async () => {
-    // مسح الـ state الداخلي
     set({ 
       user: null, 
       token: null, 
@@ -113,26 +113,20 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
 
     try {
-      // مسح التخزين المحلي
       await Promise.all([
         storage.removeItem(STORAGE_KEYS.user),
         storage.removeItem(STORAGE_KEYS.token),
       ]);
 
-      // Web: إزالة persisted state + إنهاء جلسة Supabase
-      if (typeof window !== 'undefined') {
-        window.localStorage.removeItem(STORAGE_KEYS.user);
-        window.localStorage.removeItem(STORAGE_KEYS.token);
-
-        try {
-          await supabase.auth.signOut();
-        } catch (err) {
-          console.error('Supabase logout error', err);
-        }
-
-        // إعادة توجيه لتحديث واجهة المستخدم
-        window.location.href = '/auth/login';
+      try {
+        await supabase.auth.signOut();
+      } catch (err) {
+        console.error('Supabase logout error', err);
       }
+
+      // استخدم Expo Router لإعادة التوجيه
+      router.replace('/auth/login');
+
     } catch (error) {
       console.error('Error clearing storage:', error);
     }
