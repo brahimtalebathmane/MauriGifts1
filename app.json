@@ -23,7 +23,7 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "https://i.postimg.cc/QdBvRCw7/oiljoilk.png",
+      "favicon": "./assets/images/icon.png",
       "backgroundColor": "#0f0f16",
       "themeColor": "#0f0f16",
       "preferRelatedApplications": false,
