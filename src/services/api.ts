@@ -5,47 +5,55 @@ class ApiClient {
   private async request<T>(
     endpoint: string, 
     options: RequestInit = {},
-    userToken?: string // التوكن الخاص بالمستخدم المسجل
+    userToken?: string
   ): Promise<ApiResponse<T>> {
     try {
+      // محاولة جلب التوكن من التخزين المحلي إذا لم يتم تمريره (لضمان عدم حدوث 401)
+      let finalToken = userToken;
+      if (!finalToken) {
+        const storedAuth = localStorage.getItem('supabase.auth.token') || 
+                          localStorage.getItem('sb-gyuicmqdtxjyomkiydmc-auth-token'); 
+        if (storedAuth) {
+          try {
+            const parsed = JSON.parse(storedAuth);
+            finalToken = parsed.access_token || parsed.currentSession?.access_token;
+          } catch (e) {
+            console.error("Error parsing token", e);
+          }
+        }
+      }
+
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         'apikey': API_CONFIG.anonKey || '',
       };
 
-      // ✅ الحل الجذري: إذا كان هناك توكن للمستخدم، يجب أن يكون هو الـ Authorization
-      // الخطأ 401 يحدث لأن السيرفر يتلقى anonKey بينما يحتاج توكن الأدمن
-      if (userToken && userToken.trim() !== '') {
-        headers['Authorization'] = `Bearer ${userToken}`;
+      // ✅ الحل الجذري للـ 401: وضع التوكن في الهيدر بشكل إجباري
+      if (finalToken) {
+        headers['Authorization'] = `Bearer ${finalToken}`;
       } else {
         headers['Authorization'] = `Bearer ${API_CONFIG.anonKey}`;
       }
 
-      // دمج أي هيدرز إضافية مرسلة في الخيارات
-      if (options.headers) {
-        Object.assign(headers, options.headers);
-      }
-
       const response = await fetch(`${API_CONFIG.baseUrl}/${endpoint}`, {
         ...options,
-        headers,
+        headers: { ...headers, ...options.headers },
       });
 
-      // التحقق من حالة الرد قبل محاولة قراءة JSON
       if (response.status === 401) {
-        return { error: 'جلسة العمل انتهت أو غير صالحة (401). يرجى إعادة تسجيل الدخول.' };
+        return { error: 'غير مصرح لك (401): يرجى تسجيل الخروج والدخول مرة أخرى.' };
       }
 
       const data = await response.json();
       
       if (!response.ok) {
-        return { error: data.error || data.message || `خطأ من السيرفر (${response.status})` };
+        return { error: data.error || data.message || `خطأ ${response.status}` };
       }
 
       return { data };
     } catch (error: any) {
       console.error('API Request failed:', error);
-      return { error: 'فشل الاتصال بالخادم. تأكد من جودة الإنترنت.' };
+      return { error: 'فشل الاتصال بالخادم.' };
     }
   }
 
@@ -64,14 +72,7 @@ class ApiClient {
     });
   }
 
-  async getMe(token: string) {
-    return this.request('me', {
-      method: 'POST',
-      body: JSON.stringify({ token }),
-    }, token);
-  }
-
-  // --- Admin Operations ---
+  // --- Admin Operations (المناطق الحساسة) ---
   async adminListUsers(token: string) {
     return this.request('admin_list_users', {
       method: 'POST',
@@ -79,18 +80,16 @@ class ApiClient {
     }, token);
   }
 
-  /**
-   * ✅ الدالة التي تسبب الخطأ 401 حالياً
-   */
   async adminActivateWallet(token: string, userId: string, activate: boolean) {
+    console.log("🚀 Sending activation request for:", userId, "Status:", activate);
     return this.request('admin_activate_wallet', {
       method: 'POST',
       body: JSON.stringify({
-        token, // نرسله في الـ Body احتياطاً للدوال القديمة
+        token, // للجسم
         user_id: userId,
         activate,
       }),
-    }, token); // ✅ نرسله هنا ليتم وضعه في الـ Header (حل الـ 401)
+    }, token); // للهيدر (حل الـ 401)
   }
 
   async adminAdjustWallet(token: string, userId: string, amount: number, operation: 'add' | 'subtract') {
@@ -100,20 +99,13 @@ class ApiClient {
     }, token);
   }
 
-  // --- Lists ---
+  // --- Public Data ---
   async getProducts() {
     return this.request('list_products', { method: 'GET' });
   }
 
   async getCategories() {
     return this.request('list_categories', {
-      method: 'POST',
-      body: JSON.stringify({}),
-    });
-  }
-  
-  async getPaymentMethods() {
-    return this.request('list_payment_methods', {
       method: 'POST',
       body: JSON.stringify({}),
     });
