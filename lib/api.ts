@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-// استخراج المتغيرات من البيئة (Environment Variables)
+// تأكد من ضبط هذه المتغيرات في ملف .env
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
@@ -8,10 +8,8 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export const apiService = {
   /**
-   * دالة تفعيل أو تعطيل المحفظة للمستخدم
-   * @param token - توكن المصادقة الخاص بالأدمن
-   * @param userId - معرف المستخدم المراد تعديل محفظته
-   * @param activate - حالة التفعيل (true/false)
+   * تفعيل/تعطيل المحفظة
+   * بناءً على جدول users الخاص بك
    */
   async adminActivateWallet(token: string, userId: string, activate: boolean) {
     try {
@@ -19,38 +17,35 @@ export const apiService = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // ✅ إضافة Bearer ضرورية جداً لتجاوز خطأ 403
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`, // ضروري جداً لتمرير صلاحية الـ role 'admin'
           'apikey': SUPABASE_ANON_KEY,
         },
         body: JSON.stringify({
-          user_id: userId, // ملاحظة: نستخدم user_id (بالشرطة) كما تتوقعها أغلب دوال Supabase
-          activate: activate,
+          user_id: userId, // المعرف uuid من جدول users
+          activate: activate, // القيمة boolean لتحديث الحقل is_wallet_active
         }),
       });
 
+      // إذا رد السيرفر بـ 403، فهذا يعني أن التوكن لا يملك صلاحية 'admin' في جدول users
       if (response.status === 403) {
         return { 
           data: null, 
-          error: 'صلاحيات غير كافية. يرجى تسجيل الخروج والدخول مجدداً لتحديث تصريح الأدمن.' 
+          error: 'خطأ 403: حسابك لا يملك صلاحيات إدارية كافية أو الجلسة انتهت.' 
         };
       }
 
       const result = await response.json();
-      
-      if (!response.ok) {
-        return { data: null, error: result.error || 'حدث خطأ أثناء تنفيذ العملية' };
-      }
+      if (!response.ok) throw new Error(result.error || 'حدث خطأ في السيرفر');
 
       return { data: result, error: null };
     } catch (error: any) {
-      console.error('API Error (Activate Wallet):', error);
-      return { data: null, error: 'خطأ في الاتصال بالسيرفر، تأكد من اتصالك بالإنترنت' };
+      console.error('Wallet Error:', error);
+      return { data: null, error: error.message || 'خطأ في الاتصال' };
     }
   },
 
   /**
-   * دالة تعديل رصيد المحفظة (إضافة أو خصم)
+   * تعديل الرصيد (wallet_balance)
    */
   async adminAdjustWallet(token: string, userId: string, amount: number, operation: 'add' | 'subtract') {
     try {
@@ -69,14 +64,11 @@ export const apiService = {
       });
 
       const result = await response.json();
-      
-      if (!response.ok) {
-        return { data: null, error: result.error || 'فشل تحديث الرصيد' };
-      }
+      if (!response.ok) throw new Error(result.error || 'فشل تحديث الرصيد');
 
       return { data: result, error: null };
     } catch (error: any) {
-      return { data: null, error: 'خطأ في الشبكة' };
+      return { data: null, error: error.message };
     }
-  }
+  },
 };
