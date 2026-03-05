@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Wallet, DollarSign, AlertCircle, X } from 'lucide-react-native';
+import { Wallet, DollarSign, CircleAlert as AlertCircle, X } from 'lucide-react-native';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';

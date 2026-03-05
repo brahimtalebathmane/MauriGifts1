@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Linking, ActivityIndicator } from 'react-native';
-import { Wallet, Lock, AlertCircle, Phone } from 'lucide-react-native';
+import { Wallet, Lock, CircleAlert as AlertCircle, Phone } from 'lucide-react-native';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { useAppStore } from '@/state/store';
