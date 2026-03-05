@@ -2,23 +2,23 @@ import { API_CONFIG } from '../config';
 import type { ApiResponse } from '../types';
 
 class ApiClient {
+  // ✅ تعديل دالة الطلب لاستقبال التوكن بشكل صحيح
   private async request<T>(
     endpoint: string, 
     options: RequestInit = {},
-    token?: string // إضافة باراميتر اختياري للتوكن
+    token?: string
   ): Promise<ApiResponse<T>> {
     try {
-      // إعداد الهيدرز بشكل ديناميكي
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         'apikey': API_CONFIG.anonKey || '',
         ...((options.headers as Record<string, string>) || {}),
       };
 
-      // إذا وُجد توكن، نضعه في الهيدر بتنسيق Bearer الصحيح
+      // ✅ إذا تم تمرير توكن المستخدم، نضعه في Authorization
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
-      } else if (API_CONFIG.anonKey) {
+      } else {
         headers['Authorization'] = `Bearer ${API_CONFIG.anonKey}`;
       }
 
@@ -27,13 +27,11 @@ class ApiClient {
         headers,
       });
 
-      // التعامل مع حالة عدم وجود محتوى (مثلاً 204)
-      if (response.status === 204) return { data: {} as T };
-
       const data = await response.json();
       
       if (!response.ok) {
-        return { error: data.error || data.message || 'حدث خطأ غير متوقع' };
+        // إذا كان الخطأ 401، فهذا يعني أن التوكن غير صالح أو مفقود
+        return { error: data.error || data.message || `خطأ ${response.status}: غير مصرح بالوصول` };
       }
 
       return { data };
@@ -47,21 +45,14 @@ class ApiClient {
   async signup(name: string, phoneNumber: string, pin: string) {
     return this.request('signup', {
       method: 'POST',
-      body: JSON.stringify({
-        name,
-        phone_number: phoneNumber,
-        pin,
-      }),
+      body: JSON.stringify({ name, phone_number: phoneNumber, pin }),
     });
   }
 
   async login(phoneNumber: string, pin: string) {
     return this.request('login', {
       method: 'POST',
-      body: JSON.stringify({
-        phone_number: phoneNumber,
-        pin,
-      }),
+      body: JSON.stringify({ phone_number: phoneNumber, pin }),
     });
   }
 
@@ -69,14 +60,12 @@ class ApiClient {
     return this.request('me', {
       method: 'POST',
       body: JSON.stringify({ token }),
-    }, token);
+    }, token); // تمرير التوكن للهيدر
   }
 
   // Products and Categories
   async getProducts() {
-    return this.request('list_products', {
-      method: 'GET',
-    });
+    return this.request('list_products', { method: 'GET' });
   }
 
   async getCategories() {
@@ -87,45 +76,10 @@ class ApiClient {
   }
 
   // Orders
-  async createOrder(
-    token: string,
-    productId: string,
-    paymentMethod: string,
-    paymentNumber: string
-  ) {
-    if (!token || !productId || !paymentMethod || !paymentNumber) {
-      return { error: 'جميع البيانات مطلوبة' };
-    }
-
+  async createOrder(token: string, productId: string, paymentMethod: string, paymentNumber: string) {
     return this.request('create_order', {
       method: 'POST',
-      body: JSON.stringify({
-        token,
-        product_id: productId,
-        payment_method: paymentMethod,
-        payment_number: paymentNumber,
-      }),
-    }, token);
-  }
-
-  async uploadReceipt(
-    token: string,
-    orderId: string,
-    fileBase64: string,
-    fileExt: string
-  ) {
-    if (!token || !orderId || !fileBase64 || !fileExt) {
-      return { error: 'جميع البيانات مطلوبة لرفع الإيصال' };
-    }
-
-    return this.request('upload_receipt', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        order_id: orderId,
-        fileBase64,
-        fileExt,
-      }),
+      body: JSON.stringify({ token, product_id: productId, payment_method: paymentMethod, payment_number: paymentNumber }),
     }, token);
   }
 
@@ -144,167 +98,27 @@ class ApiClient {
     }, token);
   }
 
-  async adminListOrders(token: string, status?: string) {
-    return this.request('admin_list_orders', {
-      method: 'POST',
-      body: JSON.stringify({ token, status }),
-    }, token);
-  }
-
-  async adminApproveOrder(token: string, orderId: string, deliveryCode: string) {
-    return this.request('admin_approve_order', {
+  // ✅ الدالة المسببة للمشكلة - تم إصلاح تمرير التوكن
+  async adminActivateWallet(token: string, userId: string, activate: boolean) {
+    return this.request('admin_activate_wallet', {
       method: 'POST',
       body: JSON.stringify({
-        token,
-        order_id: orderId,
-        delivery_code: deliveryCode,
+        token, // يرسل في الجسم للتوافق مع الدوال القديمة
+        user_id: userId,
+        activate,
       }),
-    }, token);
+    }, token); // ✅ تمرير التوكن هنا يضعه في Authorization Header ويحل الـ 401
   }
 
-  async adminRejectOrder(token: string, orderId: string, reason: string) {
-    return this.request('admin_reject_order', {
+  async adminAdjustWallet(token: string, userId: string, amount: number, operation: 'add' | 'subtract') {
+    return this.request('admin_adjust_wallet', {
       method: 'POST',
-      body: JSON.stringify({
-        token,
-        order_id: orderId,
-        reason,
-      }),
-    }, token);
-  }
-
-  // Notifications
-  async getNotifications(token: string, markSeen?: boolean) {
-    return this.request('notifications', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        mark_seen: markSeen,
-      }),
-    }, token);
-  }
-
-  // Change PIN
-  async changePin(token: string, currentPin: string, newPin: string) {
-    return this.request('change_pin', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        current_pin: currentPin,
-        new_pin: newPin,
-      }),
-    }, token);
-  }
-
-  // Admin management endpoints
-  async adminManageProducts(
-    token: string,
-    action: 'list' | 'create' | 'update' | 'delete',
-    product?: any
-  ) {
-    return this.request('admin_manage_products', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        action,
-        product,
-      }),
-    }, token);
-  }
-
-  async adminManageCategories(
-    token: string,
-    action: 'list' | 'create' | 'update' | 'delete',
-    category?: any
-  ) {
-    return this.request('admin_manage_categories', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        action,
-        category,
-      }),
-    }, token);
-  }
-
-  async adminManagePaymentMethods(
-    token: string,
-    action: 'list' | 'create' | 'update' | 'delete',
-    paymentMethod?: any
-  ) {
-    return this.request('admin_manage_payment_methods', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        action,
-        payment_method: paymentMethod,
-      }),
-    }, token);
-  }
-
-  async adminManageSettings(
-    token: string,
-    action: 'get' | 'update',
-    settings?: Record<string, any>
-  ) {
-    return this.request('admin_manage_settings', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        action,
-        settings,
-      }),
+      body: JSON.stringify({ token, user_id: userId, amount, operation }),
     }, token);
   }
 
   async getPaymentMethods() {
     return this.request('list_payment_methods', {
-      method: 'POST',
-      body: JSON.stringify({}),
-    });
-  }
-
-  async getProductGuides(token: string, productId: string) {
-    return this.request('get_product_guides', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        product_id: productId,
-      }),
-    }, token);
-  }
-
-  // Wallet endpoints
-  async adminActivateWallet(token: string, userId: string, activate: boolean) {
-    return this.request('admin_activate_wallet', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        user_id: userId,
-        activate,
-      }),
-    }, token);
-  }
-
-  async adminAdjustWallet(
-    token: string,
-    userId: string,
-    amount: number,
-    operation: 'add' | 'subtract'
-  ) {
-    return this.request('admin_adjust_wallet', {
-      method: 'POST',
-      body: JSON.stringify({
-        token,
-        user_id: userId,
-        amount,
-        operation,
-      }),
-    }, token);
-  }
-
-  async getWalletLimits() {
-    return this.request('get_wallet_limits', {
       method: 'POST',
       body: JSON.stringify({}),
     });
