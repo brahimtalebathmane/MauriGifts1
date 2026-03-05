@@ -1,11 +1,13 @@
 {
-  "name": "bolt-expo-starter",
+  "name": "mauriplay",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "EXPO_NO_TELEMETRY=1 expo start",
     "build:web": "expo export --platform web && node inject-manifest.js",
+    "build:android": "expo export --platform android",
+    "build:ios": "expo export --platform ios",
     "lint": "expo lint"
   },
   "dependencies": {

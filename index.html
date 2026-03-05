@@ -3,21 +3,28 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no, user-scalable=no, viewport-fit=cover" />
 
-    <!-- Manifest و Theme -->
+    <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0f0f16" />
+    <meta name="description" content="MauriPlay Gaming Platform - Buy and sell game accounts" />
 
-    <!-- iOS PWA support -->
+    <!-- iOS PWA Support -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="MauriPlay" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png" />
 
-    <title>MAURI PLAY</title>
+    <!-- Android PWA Support -->
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <title>MAURIPLAY</title>
 
     <style id="expo-reset">
-      html, body { height: 100%; margin:0; }
+      html, body { height: 100%; margin: 0; padding: 0; }
       body { overflow: hidden; background-color: #0f0f16; }
       #root { display: flex; height: 100%; flex: 1; }
     </style>
@@ -27,12 +34,14 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
 
-    <!-- Service Worker registration -->
+    <!-- Service Worker Registration -->
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js')
-          .then(() => console.log('✅ Service Worker registered'))
-          .catch(err => console.error('❌ Service Worker failed', err));
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registered:', reg.scope))
+            .catch(err => console.error('Service Worker registration failed:', err));
+        });
       }
     </script>
   </body>

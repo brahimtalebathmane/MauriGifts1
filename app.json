@@ -4,21 +4,34 @@
     "slug": "mauriplay",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "myapp",
+    "scheme": "mauriplay",
     "userInterfaceStyle": "dark",
-    "icon": "https://i.postimg.cc/QdBvRCw7/oiljoilk.png",
+    "icon": "./assets/images/icon.png",
+    "splash": {
+      "image": "./assets/images/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f0f16"
+    },
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.mauriplay.app",
-      "icon": "https://i.postimg.cc/QdBvRCw7/oiljoilk.png"
+      "icon": "./assets/images/icon.png",
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-notification"]
+      }
     },
     "android": {
       "package": "com.mauriplay.app",
       "adaptiveIcon": {
-        "foregroundImage": "https://i.postimg.cc/QdBvRCw7/oiljoilk.png",
+        "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#0f0f16"
-      }
+      },
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "bundler": "metro",

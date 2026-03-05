@@ -1,13 +1,16 @@
 {
-  "name": "MauriPlay",
+  "name": "MauriPlay - Gaming Platform",
   "short_name": "MauriPlay",
-  "description": "MauriPlay App",
+  "description": "MauriPlay Gaming Platform - Buy and sell game accounts",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0f0f16",
   "theme_color": "#0f0f16",
+  "lang": "en",
+  "dir": "auto",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-192.png",
@@ -21,5 +24,7 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "screenshots": [],
+  "categories": ["games", "shopping"]
 }
