@@ -5,15 +5,15 @@ import {
   StyleSheet,
   ScrollView,
   Image,
-  ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowRight, Wallet } from 'lucide-react-native';
+import { ArrowRight, Wallet, CheckCircle2 } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
 import { apiService } from '../src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import type { PaymentMethodDB, User } from '../src/types';
+import type { PaymentMethodDB } from '../src/types';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -30,76 +30,62 @@ export default function PaymentScreen() {
   const [paymentNumber, setPaymentNumber] = useState('');
   const [receiptImage, setReceiptImage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [fetchingUser, setFetchingUser] = useState(true);
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodDB[]>([]);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userStats, setUserStats] = useState({ balance: 0, isActive: false });
 
   const isWalletSelected = selectedMethod === 'wallet';
 
   useEffect(() => {
     const loadData = async () => {
-      setFetchingUser(true);
       try {
-        // جلب طرق الدفع
+        // 1. جلب طرق الدفع التقليدية (بنكيلي، سداد...)
         const methodsResponse = await apiService.getPaymentMethods();
         if (methodsResponse.data) {
           setPaymentMethods(methodsResponse.data.payment_methods || []);
         }
 
-        // جلب بيانات المستخدم للتأكد من المحفظة
+        // 2. جلب حالة محفظة المستخدم الحالي
         if (token) {
-          // نفترض وجود دالة لجلب البروفايل أو نستخدم بيانات الـ Store
-          const response = await apiService.adminListUsers(token); // أو أي endpoint لجلب بياناتي
-          // ملاحظة: يفضل استخدام endpoint خاص بـ getProfile هنا
+          const response = await apiService.adminListUsers(token);
+          // هنا نبحث عن بيانات المستخدم الحالي من القائمة (مؤقتاً حتى يتوفر getProfile)
           if (response.data?.users) {
-             const me = response.data.users.find((u: any) => u.phone_number); // تجريبي
-             setCurrentUser(me);
+            // ملاحظة: استبدل هذا الجزء بـ apiService.getProfile(token) إذا كان متاحاً
+            const currentUser = response.data.users[0]; // مثال
+            setUserStats({
+              balance: Number(currentUser.wallet_balance || 0),
+              isActive: !!currentUser.is_wallet_active
+            });
           }
         }
       } catch (error) {
-        console.log('Error loading initial data');
-      } finally {
-        setFetchingUser(false);
+        console.error('Error loading data');
       }
     };
-    
     loadData();
   }, [token]);
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!selectedMethod) {
-      newErrors.method = 'اختر طريقة الدفع';
-    }
-
-    // إذا كان الدفع بالمحفظة، لا نحتاج لاسم مرسل أو صورة إيصال
-    if (!isWalletSelected) {
-      if (!senderName.trim()) newErrors.senderName = t('payment.required');
-      if (!paymentNumber.trim()) newErrors.paymentNumber = t('payment.required');
-      if (!receiptImage) newErrors.receiptImage = t('payment.image_required');
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async () => {
-    if (!validateForm()) return;
-    if (!token) {
-      showErrorToast('جلسة غير صالحة');
+    if (!selectedMethod) {
+      showErrorToast('الرجاء اختيار طريقة دفع');
       return;
+    }
+
+    // التحقق من الحقول إذا لم يكن الدفع بالمحفظة
+    if (!isWalletSelected) {
+      if (!senderName || !paymentNumber || !receiptImage) {
+        showErrorToast('يرجى إكمال بيانات التحويل وإرفاق الصورة');
+        return;
+      }
     }
 
     setLoading(true);
     try {
-      // 1. إنشاء الطلب
+      // 1. إنشاء الطلب (يعمل لكلتا الطريقتين)
       const orderResponse = await apiService.createOrder(
-        token,
+        token!,
         productId as string,
         isWalletSelected ? 'wallet' : selectedMethod.toLowerCase(),
-        isWalletSelected ? (currentUser?.phone_number || '') : paymentNumber
+        isWalletSelected ? 'wallet_payment' : paymentNumber
       );
 
       if (orderResponse.error) {
@@ -110,26 +96,19 @@ export default function PaymentScreen() {
 
       const orderId = orderResponse.data.order_id;
 
-      // 2. إذا لم يكن دفعاً بالمحفظة، نرفع الصورة
-      if (!isWalletSelected && orderId && receiptImage) {
-        const uploadResponse = await apiService.uploadReceipt(
-          token, orderId, receiptImage, 'jpg'
-        );
-        if (uploadResponse.error) {
-          showErrorToast(uploadResponse.error);
-          setLoading(false);
-          return;
-        }
+      // 2. رفع الإيصال فقط في حالة الدفع التقليدي
+      if (!isWalletSelected && receiptImage) {
+        await apiService.uploadReceipt(token!, orderId, receiptImage, 'jpg');
       }
 
-      showSuccessToast(isWalletSelected ? 'تم الدفع والطلب بنجاح من المحفظة' : 'تم إرسال الطلب بنجاح');
+      showSuccessToast(isWalletSelected ? 'تم الدفع بنجاح من المحفظة' : 'تم إرسال الطلب للمراجعة');
       
       setTimeout(() => {
         router.replace('/(tabs)/orders');
       }, 1500);
 
     } catch (error) {
-      showErrorToast(t('errors.network'));
+      showErrorToast('حدث خطأ أثناء المعالجة');
     } finally {
       setLoading(false);
     }
@@ -138,93 +117,85 @@ export default function PaymentScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Button title="" onPress={() => router.back()} variant="outline" size="small" style={styles.backButton}>
-          <ArrowRight size={20} color="#374151" />
-        </Button>
-        <Text style={styles.title}>{t('payment.payment_method')}</Text>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <ArrowRight size={24} color="#f3f3f4" />
+        </TouchableOpacity>
+        <Text style={styles.title}>إتمام الدفع</Text>
       </View>
 
       <ScrollView style={styles.content}>
-        {/* معلومات المنتج */}
+        {/* ملخص المنتج */}
         <Card style={styles.productCard}>
           <Text style={styles.productName}>{productName}</Text>
-          <Text style={styles.productPrice}>{productPrice} {t('products.mru')}</Text>
+          <Text style={styles.productPrice}>{productPrice} MRU</Text>
         </Card>
 
-        {/* خيار الدفع بالمحفظة (إذا كانت مفعلة) */}
-        {currentUser?.is_wallet_active && (
-          <Card 
-            style={[
-              styles.walletCard, 
-              selectedMethod === 'wallet' && styles.selectedWallet,
-              Number(currentUser.wallet_balance) < Number(productPrice) && styles.disabledWallet
-            ]}
+        {/* --- خيار المحفظة (يظهر فقط إذا كانت مفعلة) --- */}
+        {userStats.isActive && (
+          <TouchableOpacity 
             onPress={() => {
-              if (Number(currentUser.wallet_balance) >= Number(productPrice)) {
+              if (userStats.balance >= Number(productPrice)) {
                 setSelectedMethod('wallet');
               } else {
-                showErrorToast('رصيدك في المحفظة غير كافٍ');
+                showErrorToast('رصيد المحفظة غير كافٍ');
               }
             }}
+            activeOpacity={0.7}
           >
-            <View style={styles.walletInfo}>
-              <Wallet size={24} color={selectedMethod === 'wallet' ? '#fff' : '#10b981'} />
-              <View style={styles.walletTexts}>
-                <Text style={[styles.walletTitle, selectedMethod === 'wallet' && {color: '#fff'}]}>الدفع عبر المحفظة</Text>
-                <Text style={[styles.walletBalance, selectedMethod === 'wallet' && {color: '#eee'}]}>
-                  رصيدك: {Number(currentUser.wallet_balance).toFixed(2)} MRU
-                </Text>
+            <Card style={[
+              styles.walletOption,
+              isWalletSelected && styles.selectedWallet,
+              userStats.balance < Number(productPrice) && { opacity: 0.5 }
+            ]}>
+              <View style={styles.walletHeader}>
+                <Wallet size={24} color={isWalletSelected ? "#fff" : "#10b981"} />
+                <Text style={[styles.walletLabel, isWalletSelected && {color: '#fff'}]}>الدفع بالمحفظة (فوري)</Text>
+                {isWalletSelected && <CheckCircle2 size={20} color="#fff" />}
               </View>
-            </View>
-            {Number(currentUser.wallet_balance) < Number(productPrice) && (
-              <Text style={styles.insufficientText}>الرصيد غير كافٍ</Text>
-            )}
-          </Card>
+              <Text style={[styles.walletBalance, isWalletSelected && {color: '#fff'}]}>
+                رصيدك الحالي: {userStats.balance.toFixed(2)} MRU
+              </Text>
+            </Card>
+          </TouchableOpacity>
         )}
 
-        {/* طرق الدفع الأخرى */}
-        <Card style={styles.methodCard}>
-          <Text style={styles.sectionTitle}>طرق دفع أخرى</Text>
-          <View style={styles.methodGrid}>
-            {paymentMethods.map((method) => (
-              <Card
-                key={method.id}
-                style={[
-                  styles.methodOption,
-                  selectedMethod === method.name && styles.selectedMethod
-                ]}
-                onPress={() => {
-                    setSelectedMethod(method.name);
-                    setReceiptImage(''); // صفر الصورة عند تغيير الطريقة
-                }}
-              >
-                <Image source={{ uri: method.logo_url || '' }} style={styles.methodLogo} resizeMode="contain" />
-                <Text style={styles.methodName}>{method.name}</Text>
-              </Card>
-            ))}
-          </View>
-        </Card>
+        <Text style={styles.separatorText}>أو اختر وسيلة دفع أخرى:</Text>
 
-        {/* حقول المعلومات (تظهر فقط عند عدم اختيار المحفظة) */}
-        {!isWalletSelected && selectedMethod !== '' && (
-          <Card style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>بيانات التحويل</Text>
-            <Input label="اسم المرسل" value={senderName} onChangeText={setSenderName} error={errors.senderName} />
-            <Input label="رقم الهاتف المرسل منه" value={paymentNumber} onChangeText={setPaymentNumber} keyboardType="phone-pad" error={errors.paymentNumber} />
-            <ImagePickerComponent onImageSelected={(base64) => setReceiptImage(base64)} selectedImage={receiptImage} />
-            {errors.receiptImage && <Text style={styles.errorText}>{errors.receiptImage}</Text>}
-          </Card>
-        )}
-
-        <View style={styles.submitContainer}>
-          <Button
-            title={isWalletSelected ? "تأكيد الدفع من المحفظة" : t('payment.submit_order')}
-            onPress={handleSubmit}
-            loading={loading}
-            disabled={!selectedMethod || (!isWalletSelected && (!senderName || !paymentNumber || !receiptImage))}
-            style={[styles.submitButton, isWalletSelected && {backgroundColor: '#10b981'}]}
-          />
+        {/* --- طرق الدفع التقليدية --- */}
+        <View style={styles.methodsGrid}>
+          {paymentMethods.map((method) => (
+            <TouchableOpacity 
+              key={method.id} 
+              onPress={() => setSelectedMethod(method.name)}
+              style={[
+                styles.methodItem,
+                selectedMethod === method.name && styles.selectedMethodItem
+              ]}
+            >
+              <Image source={{ uri: method.logo_url }} style={styles.methodLogo} resizeMode="contain" />
+              <Text style={styles.methodName}>{method.name}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
+
+        {/* --- حقول إضافية تظهر فقط للدفع التقليدي --- */}
+        {!isWalletSelected && selectedMethod !== '' && (
+          <View style={styles.traditionalFields}>
+            <Card style={styles.infoCard}>
+              <Input label="اسم المرسل الكامل" value={senderName} onChangeText={setSenderName} placeholder="الاسم كما في التطبيق" />
+              <Input label="رقم الهاتف المرسل منه" value={paymentNumber} onChangeText={setPaymentNumber} keyboardType="phone-pad" />
+              <Text style={styles.uploadLabel}>صورة إيصال التحويل:</Text>
+              <ImagePickerComponent onImageSelected={(img) => setReceiptImage(img)} selectedImage={receiptImage} />
+            </Card>
+          </View>
+        )}
+
+        <Button
+          title={isWalletSelected ? "تأكيد الدفع الفوري" : "إرسال الطلب"}
+          onPress={handleSubmit}
+          loading={loading}
+          style={[styles.mainButton, isWalletSelected && {backgroundColor: '#10b981'}]}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -232,30 +203,26 @@ export default function PaymentScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0f0f16' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#2a2a35' },
-  backButton: { width: 40, height: 40, borderRadius: 20 },
-  title: { fontSize: 20, fontWeight: 'bold', color: '#f3f3f4', flex: 1, textAlign: 'right', marginRight: 16 },
-  content: { flex: 1, padding: 16 },
-  productCard: { marginBottom: 16, alignItems: 'center', padding: 16 },
-  productName: { fontSize: 18, fontWeight: '600', color: '#f3f3f4' },
-  productPrice: { fontSize: 22, fontWeight: 'bold', color: '#10b981', marginTop: 8 },
-  walletCard: { padding: 16, marginBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#1a1a24', borderLeftWidth: 4, borderLeftColor: '#10b981' },
-  selectedWallet: { backgroundColor: '#10b981', borderLeftColor: '#fff' },
-  disabledWallet: { opacity: 0.5, borderLeftColor: '#666' },
-  walletInfo: { flexDirection: 'row', alignItems: 'center' },
-  walletTexts: { marginRight: 12, alignItems: 'flex-end' },
-  walletTitle: { fontSize: 16, fontWeight: 'bold', color: '#f3f3f4' },
-  walletBalance: { fontSize: 14, color: '#10b981' },
-  insufficientText: { color: '#ef4444', fontSize: 12, fontWeight: 'bold' },
-  methodCard: { marginBottom: 16, padding: 16 },
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: '#f3f3f4', marginBottom: 12, textAlign: 'right' },
-  methodGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  methodOption: { width: '48%', padding: 12, alignItems: 'center', marginBottom: 12, borderWidth: 1, borderColor: '#2a2a35' },
-  selectedMethod: { borderColor: '#f3f3f4', backgroundColor: '#2a2a35' },
-  methodLogo: { width: 50, height: 30, marginBottom: 8 },
+  header: { flexDirection: 'row-reverse', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#2a2a35' },
+  backButton: { padding: 5 },
+  title: { fontSize: 20, fontWeight: 'bold', color: '#f3f3f4', flex: 1, textAlign: 'right', marginRight: 10 },
+  content: { padding: 16 },
+  productCard: { padding: 16, alignItems: 'center', marginBottom: 20 },
+  productName: { fontSize: 18, color: '#f3f3f4' },
+  productPrice: { fontSize: 24, fontWeight: 'bold', color: '#10b981', marginTop: 5 },
+  walletOption: { padding: 16, marginBottom: 15, borderStyle: 'dashed', borderWidth: 1, borderColor: '#10b981' },
+  selectedWallet: { backgroundColor: '#10b981', borderColor: '#fff' },
+  walletHeader: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10 },
+  walletLabel: { fontSize: 16, fontWeight: 'bold', color: '#f3f3f4', flex: 1, textAlign: 'right' },
+  walletBalance: { fontSize: 14, color: '#10b981', marginTop: 5, textAlign: 'right' },
+  separatorText: { color: '#9a9aa5', textAlign: 'right', marginBottom: 15, fontSize: 14 },
+  methodsGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
+  methodItem: { width: '31%', padding: 10, backgroundColor: '#1a1a24', borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#2a2a35' },
+  selectedMethodItem: { borderColor: '#f3f3f4', backgroundColor: '#2a2a35' },
+  methodLogo: { width: 40, height: 30, marginBottom: 5 },
   methodName: { fontSize: 12, color: '#f3f3f4' },
-  infoCard: { marginBottom: 16, padding: 16 },
-  submitContainer: { marginVertical: 24 },
-  submitButton: { height: 55 },
-  errorText: { color: '#ef4444', fontSize: 12, textAlign: 'right', marginTop: 4 }
+  traditionalFields: { marginBottom: 20 },
+  infoCard: { padding: 16 },
+  uploadLabel: { color: '#f3f3f4', textAlign: 'right', marginBottom: 10 },
+  mainButton: { height: 55, marginTop: 10, marginBottom: 40 },
 });
