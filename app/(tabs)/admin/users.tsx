@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Users, User as UserIcon, Wallet } from 'lucide-react-native';
@@ -59,7 +60,8 @@ export default function AdminUsersScreen() {
     loadUsers();
   }, [token]);
 
-  const formatPhoneNumber = (phone: string) => {
+  const formatPhoneNumberLocal = (phone: string) => {
+    if (!phone) return '';
     return phone.replace(/(\d{2})(\d{2})(\d{2})(\d{2})/, '$1-$2-$3-$4');
   };
 
@@ -128,21 +130,21 @@ export default function AdminUsersScreen() {
               <View style={styles.userDetails}>
                 <View style={styles.detailRow}>
                   <Text style={styles.detailValue}>
-                    {formatPhoneNumber(user.phone_number)}
+                    {formatPhoneNumberLocal(user.phone_number)}
                   </Text>
                   <Text style={styles.detailLabel}>رقم الهاتف:</Text>
                 </View>
 
                 <View style={styles.detailRow}>
                   <Text style={styles.detailValue}>
-                    {user.order_count}
+                    {user.order_count || 0}
                   </Text>
                   <Text style={styles.detailLabel}>{t('admin.order_count')}:</Text>
                 </View>
 
                 <View style={styles.detailRow}>
                   <Text style={styles.detailValue}>
-                    {new Date(user.created_at).toLocaleDateString('ar-SA')}
+                    {user.created_at ? new Date(user.created_at).toLocaleDateString('ar-SA') : '---'}
                   </Text>
                   <Text style={styles.detailLabel}>تاريخ الانضمام:</Text>
                 </View>
@@ -157,10 +159,11 @@ export default function AdminUsersScreen() {
                   <Text style={styles.detailLabel}>المحفظة:</Text>
                 </View>
 
+                {/* ✅ تم إصلاح السطر أدناه لمنع الانهيار */}
                 {user.is_wallet_active && (
                   <View style={styles.detailRow}>
                     <Text style={styles.detailValue}>
-                      {user.wallet_balance.toFixed(2)} MRU
+                      {Number(user?.wallet_balance || 0).toFixed(2)} MRU
                     </Text>
                     <Text style={styles.detailLabel}>الرصيد:</Text>
                   </View>
@@ -175,7 +178,10 @@ export default function AdminUsersScreen() {
                   setWalletModalVisible(true);
                 }}
                 icon={<Wallet size={20} color="#3b82f6" />}
-                style={styles.walletButton}
+                style={[
+                  styles.walletButton,
+                  Platform.OS === 'web' && { cursor: 'pointer' }
+                ]}
               />
             </Card>
           ))
