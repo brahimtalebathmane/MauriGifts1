@@ -55,7 +55,10 @@ Deno.serve(async (req) => {
         name,
         phone_number,
         role,
+        is_wallet_active,
+        wallet_balance,
         created_at,
+        updated_at,
         orders (id)
       `)
       .order('created_at', { ascending: false });

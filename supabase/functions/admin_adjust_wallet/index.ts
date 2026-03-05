@@ -1,10 +1,37 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { z } from 'npm:zod@3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
 };
+
+const adjustWalletSchema = z.object({
+  token: z.string().min(1),
+  user_id: z.string().uuid(),
+  amount: z.number().positive(),
+  operation: z.enum(['add', 'subtract']),
+});
+
+async function validateAdminSession(supabase: any, token: string) {
+  const { data: session, error } = await supabase
+    .from('sessions')
+    .select(`
+      user_id,
+      expires_at,
+      users (role)
+    `)
+    .eq('token', token)
+    .gte('expires_at', new Date().toISOString())
+    .single();
+
+  if (error || !session || session.users.role !== 'admin') {
+    throw new Error('غير مصرح لك بالوصول');
+  }
+
+  return session.user_id;
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -13,31 +40,15 @@ Deno.serve(async (req: Request) => {
 
   try {
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { persistSession: false } }
     );
 
-    const { token, user_id, amount, operation } = await req.json();
+    const body = await req.json();
+    const { token, user_id, amount, operation } = adjustWalletSchema.parse(body);
 
-    if (!token || !user_id || amount === undefined || !operation) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const { data: authUser } = await supabase
-      .from('users')
-      .select('id, role')
-      .eq('session_token', token)
-      .maybeSingle();
-
-    if (!authUser || authUser.role !== 'admin') {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    await validateAdminSession(supabase, token);
 
     const { data: targetUser } = await supabase
       .from('users')
@@ -46,17 +57,11 @@ Deno.serve(async (req: Request) => {
       .maybeSingle();
 
     if (!targetUser) {
-      return new Response(
-        JSON.stringify({ error: 'User not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('المستخدم غير موجود');
     }
 
     if (!targetUser.is_wallet_active) {
-      return new Response(
-        JSON.stringify({ error: 'Wallet is not active' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('المحفظة غير مفعلة');
     }
 
     const { data: settings } = await supabase
@@ -67,56 +72,46 @@ Deno.serve(async (req: Request) => {
 
     const limits = settings?.value || { max_balance: 5000 };
     const currentBalance = parseFloat(targetUser.wallet_balance.toString());
-    const adjustAmount = parseFloat(amount.toString());
 
     let newBalance: number;
     if (operation === 'add') {
-      newBalance = currentBalance + adjustAmount;
-    } else if (operation === 'subtract') {
-      newBalance = currentBalance - adjustAmount;
+      newBalance = currentBalance + amount;
     } else {
-      return new Response(
-        JSON.stringify({ error: 'Invalid operation' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      newBalance = currentBalance - amount;
     }
 
     if (newBalance < 0) {
-      return new Response(
-        JSON.stringify({ error: 'Insufficient balance' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('الرصيد غير كافٍ');
     }
 
     if (newBalance > limits.max_balance) {
-      return new Response(
-        JSON.stringify({ error: `Balance cannot exceed ${limits.max_balance} MRU` }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error(`الرصيد لا يمكن أن يتجاوز ${limits.max_balance} أوقية`);
     }
 
     const { data: updatedUser, error: updateError } = await supabase
       .from('users')
-      .update({ wallet_balance: newBalance })
+      .update({
+        wallet_balance: newBalance,
+        updated_at: new Date().toISOString()
+      })
       .eq('id', user_id)
       .select('id, name, phone_number, role, is_wallet_active, wallet_balance, created_at, updated_at')
       .single();
 
     if (updateError) {
-      return new Response(
-        JSON.stringify({ error: updateError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error(`فشل تحديث الرصيد: ${updateError.message}`);
     }
 
     return new Response(
       JSON.stringify({ user: updatedUser }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error) {
+
+  } catch (error: any) {
+    console.error('Adjust wallet error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: error.message || 'خطأ في تعديل الرصيد' }),
+      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

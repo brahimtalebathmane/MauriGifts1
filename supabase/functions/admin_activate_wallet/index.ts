@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { z } from 'npm:zod@3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -6,62 +7,53 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
 };
 
+const activateWalletSchema = z.object({
+  token: z.string().min(1),
+  user_id: z.string().uuid(),
+  activate: z.boolean(),
+});
+
+async function validateAdminSession(supabase: any, token: string) {
+  const { data: session, error } = await supabase
+    .from('sessions')
+    .select(`
+      user_id,
+      expires_at,
+      users (role)
+    `)
+    .eq('token', token)
+    .gte('expires_at', new Date().toISOString())
+    .single();
+
+  if (error || !session || session.users.role !== 'admin') {
+    throw new Error('غير مصرح لك بالوصول');
+  }
+
+  return session.user_id;
+}
+
 Deno.serve(async (req: Request) => {
-  // 1. التعامل مع طلبات OPTIONS الخاصة بـ CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   try {
-    // إنشاء عميل Supabase باستخدام مفاتيح النظام
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')! // استخدام مفتاح الخدمة لتجاوز الـ RLS
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { persistSession: false } }
     );
 
-    // استقبال البيانات من الـ Frontend
-    const { user_id, activate } = await req.json();
-    
-    // جلب التوكن من الهيدر (Authorization: Bearer <token>)
-    const authHeader = req.headers.get('Authorization')?.split(' ')[1];
+    const body = await req.json();
+    const { token, user_id, activate } = activateWalletSchema.parse(body);
 
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'لم يتم توفير توكن المصادقة' }), 
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    await validateAdminSession(supabase, token);
 
-    // 2. التحقق من صحة التوكن وجلب بيانات صاحب الطلب
-    const { data: { user: authUserSession }, error: authError } = await supabaseAdmin.auth.getUser(authHeader);
-
-    if (authError || !authUserSession) {
-      return new Response(
-        JSON.stringify({ error: 'جلسة العمل غير صالحة أو منتهية' }), 
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // 3. التحقق من رتبة المستخدم (Admin) في جدول users
-    const { data: adminRecord, error: adminError } = await supabaseAdmin
+    const { data: updatedUser, error: updateError } = await supabase
       .from('users')
-      .select('role')
-      .eq('id', authUserSession.id)
-      .single();
-
-    if (adminError || !adminRecord || adminRecord.role !== 'admin') {
-      return new Response(
-        JSON.stringify({ error: 'غير مسموح: يجب أن تكون مديراً للقيام بهذا الإجراء' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // 4. تنفيذ عملية التحديث للمستخدم المستهدف
-    const { data: updatedUser, error: updateError } = await supabaseAdmin
-      .from('users')
-      .update({ 
+      .update({
         is_wallet_active: activate,
-        updated_at: new Date().toISOString() 
+        updated_at: new Date().toISOString()
       })
       .eq('id', user_id)
       .select('id, name, phone_number, role, is_wallet_active, wallet_balance, created_at, updated_at')
@@ -71,17 +63,16 @@ Deno.serve(async (req: Request) => {
       throw new Error(`فشل تحديث البيانات: ${updateError.message}`);
     }
 
-    // العودة بالنتيجة الناجحة
     return new Response(
-      JSON.stringify({ user: updatedUser, message: 'تم تحديث حالة المحفظة بنجاح' }),
+      JSON.stringify({ user: updatedUser }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error: any) {
-    console.error('Function Error:', error.message);
+    console.error('Activate wallet error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: error.message || 'خطأ في تحديث المحفظة' }),
+      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
