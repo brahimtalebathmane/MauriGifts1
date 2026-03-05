@@ -110,6 +110,52 @@ class ApiClient {
       body: JSON.stringify({}),
     });
   }
+
+  async getPaymentMethods() {
+    return this.request('get_payment_methods', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  }
+
+  // --- User Operations ---
+  async getMe(token: string) {
+    return this.request('me', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    }, token);
+  }
+
+  async createOrder(token: string, productId: string, paymentMethod: string, paymentNumber: string) {
+    return this.request('create_order', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        product_id: productId,
+        payment_method: paymentMethod,
+        payment_number: paymentNumber,
+      }),
+    }, token);
+  }
+
+  async uploadReceipt(token: string, orderId: string, imageBase64: string, fileExtension: string) {
+    return this.request('upload_receipt', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        order_id: orderId,
+        image_base64: imageBase64,
+        file_extension: fileExtension,
+      }),
+    }, token);
+  }
+
+  async getMyOrders(token: string) {
+    return this.request('my_orders', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    }, token);
+  }
 }
 
 export const apiService = new ApiClient();

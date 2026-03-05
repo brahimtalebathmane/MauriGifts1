@@ -15,7 +15,7 @@ const createOrderSchema = z.object({
 });
 
 // Valid payment method enum values
-const validPaymentMethods = ['bankily', 'sidad', 'masrvi', 'bimbank', 'amanati', 'klik'];
+const validPaymentMethods = ['bankily', 'sidad', 'masrvi', 'bimbank', 'amanati', 'klik', 'wallet'];
 async function validateSession(supabase: any, token: string) {
   const { data: session, error } = await supabase
     .from('sessions')
@@ -71,7 +71,37 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create order
+    // For wallet payments, verify user has active wallet and sufficient balance
+    if (payment_method === 'wallet') {
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('is_wallet_active, wallet_balance')
+        .eq('id', userId)
+        .single();
+
+      if (userError || !user) {
+        return new Response(
+          JSON.stringify({ error: 'خطأ في التحقق من بيانات المستخدم' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (!user.is_wallet_active) {
+        return new Response(
+          JSON.stringify({ error: 'المحفظة غير مفعلة' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (user.wallet_balance < product.price) {
+        return new Response(
+          JSON.stringify({ error: 'رصيد المحفظة غير كافٍ' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // Create order - status will be set by trigger for wallet payments
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -79,7 +109,7 @@ Deno.serve(async (req) => {
         product_id,
         payment_method,
         payment_number,
-        status: 'under_review'
+        status: payment_method === 'wallet' ? 'pending' : 'under_review'
       })
       .select()
       .single();

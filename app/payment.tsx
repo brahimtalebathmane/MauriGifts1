@@ -11,18 +11,18 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowRight, Wallet, CheckCircle2 } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
-import { apiService } from '../src/services/api';
+import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import type { PaymentMethodDB } from '../src/types';
+import type { PaymentMethodDB } from '@/src/types';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import ImagePickerComponent from '../src/components/forms/ImagePicker';
-import { showSuccessToast, showErrorToast } from '../src/utils/toast';
+import ImagePickerComponent from '@/src/components/forms/ImagePicker';
+import { showSuccessToast, showErrorToast } from '@/src/utils/toast';
 
 export default function PaymentScreen() {
   const { productId, productName, productPrice } = useLocalSearchParams();
-  const { token } = useAppStore();
+  const { token, user, refreshWallet } = useAppStore();
   const { t } = useI18n();
 
   const [selectedMethod, setSelectedMethod] = useState<string>('');
@@ -31,31 +31,22 @@ export default function PaymentScreen() {
   const [receiptImage, setReceiptImage] = useState('');
   const [loading, setLoading] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodDB[]>([]);
-  const [userStats, setUserStats] = useState({ balance: 0, isActive: false });
 
   const isWalletSelected = selectedMethod === 'wallet';
+  const userBalance = Number(user?.wallet_balance || 0);
+  const isWalletActive = !!user?.is_wallet_active;
+  const productPriceNum = Number(productPrice);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        // 1. جلب طرق الدفع التقليدية (بنكيلي، سداد...)
         const methodsResponse = await apiService.getPaymentMethods();
         if (methodsResponse.data) {
           setPaymentMethods(methodsResponse.data.payment_methods || []);
         }
 
-        // 2. جلب حالة محفظة المستخدم الحالي
         if (token) {
-          const response = await apiService.adminListUsers(token);
-          // هنا نبحث عن بيانات المستخدم الحالي من القائمة (مؤقتاً حتى يتوفر getProfile)
-          if (response.data?.users) {
-            // ملاحظة: استبدل هذا الجزء بـ apiService.getProfile(token) إذا كان متاحاً
-            const currentUser = response.data.users[0]; // مثال
-            setUserStats({
-              balance: Number(currentUser.wallet_balance || 0),
-              isActive: !!currentUser.is_wallet_active
-            });
-          }
+          await refreshWallet();
         }
       } catch (error) {
         console.error('Error loading data');
@@ -70,7 +61,6 @@ export default function PaymentScreen() {
       return;
     }
 
-    // التحقق من الحقول إذا لم يكن الدفع بالمحفظة
     if (!isWalletSelected) {
       if (!senderName || !paymentNumber || !receiptImage) {
         showErrorToast('يرجى إكمال بيانات التحويل وإرفاق الصورة');
@@ -80,7 +70,6 @@ export default function PaymentScreen() {
 
     setLoading(true);
     try {
-      // 1. إنشاء الطلب (يعمل لكلتا الطريقتين)
       const orderResponse = await apiService.createOrder(
         token!,
         productId as string,
@@ -96,13 +85,16 @@ export default function PaymentScreen() {
 
       const orderId = orderResponse.data.order_id;
 
-      // 2. رفع الإيصال فقط في حالة الدفع التقليدي
       if (!isWalletSelected && receiptImage) {
         await apiService.uploadReceipt(token!, orderId, receiptImage, 'jpg');
       }
 
+      if (isWalletSelected) {
+        await refreshWallet();
+      }
+
       showSuccessToast(isWalletSelected ? 'تم الدفع بنجاح من المحفظة' : 'تم إرسال الطلب للمراجعة');
-      
+
       setTimeout(() => {
         router.replace('/(tabs)/orders');
       }, 1500);
@@ -131,21 +123,22 @@ export default function PaymentScreen() {
         </Card>
 
         {/* --- خيار المحفظة (يظهر فقط إذا كانت مفعلة) --- */}
-        {userStats.isActive && (
-          <TouchableOpacity 
+        {isWalletActive && (
+          <TouchableOpacity
             onPress={() => {
-              if (userStats.balance >= Number(productPrice)) {
+              if (userBalance >= productPriceNum) {
                 setSelectedMethod('wallet');
               } else {
                 showErrorToast('رصيد المحفظة غير كافٍ');
               }
             }}
             activeOpacity={0.7}
+            disabled={userBalance < productPriceNum}
           >
             <Card style={[
               styles.walletOption,
               isWalletSelected && styles.selectedWallet,
-              userStats.balance < Number(productPrice) && { opacity: 0.5 }
+              userBalance < productPriceNum && { opacity: 0.5 }
             ]}>
               <View style={styles.walletHeader}>
                 <Wallet size={24} color={isWalletSelected ? "#fff" : "#10b981"} />
@@ -153,8 +146,11 @@ export default function PaymentScreen() {
                 {isWalletSelected && <CheckCircle2 size={20} color="#fff" />}
               </View>
               <Text style={[styles.walletBalance, isWalletSelected && {color: '#fff'}]}>
-                رصيدك الحالي: {userStats.balance.toFixed(2)} MRU
+                رصيدك الحالي: {userBalance.toFixed(2)} MRU
               </Text>
+              {userBalance < productPriceNum && (
+                <Text style={styles.insufficientText}>الرصيد غير كافٍ</Text>
+              )}
             </Card>
           </TouchableOpacity>
         )}
@@ -210,11 +206,12 @@ const styles = StyleSheet.create({
   productCard: { padding: 16, alignItems: 'center', marginBottom: 20 },
   productName: { fontSize: 18, color: '#f3f3f4' },
   productPrice: { fontSize: 24, fontWeight: 'bold', color: '#10b981', marginTop: 5 },
-  walletOption: { padding: 16, marginBottom: 15, borderStyle: 'dashed', borderWidth: 1, borderColor: '#10b981' },
-  selectedWallet: { backgroundColor: '#10b981', borderColor: '#fff' },
+  walletOption: { padding: 16, marginBottom: 15, borderStyle: 'dashed', borderWidth: 2, borderColor: '#10b981' },
+  selectedWallet: { backgroundColor: '#10b981', borderColor: '#fff', borderStyle: 'solid' },
   walletHeader: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10 },
   walletLabel: { fontSize: 16, fontWeight: 'bold', color: '#f3f3f4', flex: 1, textAlign: 'right' },
-  walletBalance: { fontSize: 14, color: '#10b981', marginTop: 5, textAlign: 'right' },
+  walletBalance: { fontSize: 14, color: '#10b981', marginTop: 5, textAlign: 'right', fontWeight: '600' },
+  insufficientText: { fontSize: 12, color: '#ef4444', marginTop: 5, textAlign: 'right', fontWeight: '600' },
   separatorText: { color: '#9a9aa5', textAlign: 'right', marginBottom: 15, fontSize: 14 },
   methodsGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
   methodItem: { width: '31%', padding: 10, backgroundColor: '#1a1a24', borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#2a2a35' },
