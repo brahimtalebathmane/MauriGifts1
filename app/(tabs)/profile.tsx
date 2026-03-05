@@ -6,6 +6,7 @@ import {
   ScrollView,
   Alert,
   Modal,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -30,36 +31,50 @@ export default function ProfileScreen() {
   });
   const [pinLoading, setPinLoading] = useState(false);
 
-  // 🔥 FIXED LOGOUT
-  const handleLogout = () => {
-    Alert.alert(
-      'تسجيل الخروج',
-      'هل أنت متأكد من تسجيل الخروج؟',
-      [
-        { text: 'إلغاء', style: 'cancel' },
-        {
-          text: 'تسجيل خروج',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
+  // دالة تنفيذ الخروج الفعلية
+  const performLogout = async () => {
+    try {
+      await logout();
 
-              if (typeof window !== 'undefined') {
-                // Web
-                window.localStorage.clear();
-                window.sessionStorage.clear();
-                window.location.replace('/auth/login');
-              } else {
-                // Mobile
-                router.replace('/auth/login');
-              }
-            } catch (error) {
-              console.error('Logout error:', error);
-            }
+      if (Platform.OS === 'web') {
+        // تنظيف شامل للويب
+        window.localStorage.clear();
+        window.sessionStorage.clear();
+        // استخدام replace لضمان عدم العودة للخلف
+        window.location.replace('/auth/login');
+      } else {
+        // للموبايل
+        router.replace('/auth/login');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      showErrorToast('حدث خطأ أثناء تسجيل الخروج');
+    }
+  };
+
+  // معالج الضغط على زر الخروج (حل مشكلة الويب)
+  const handleLogout = () => {
+    if (Platform.OS === 'web') {
+      // في الويب نستخدم confirm لأن Alert.alert لا تظهر
+      const confirmed = window.confirm('هل أنت متأكد من تسجيل الخروج؟');
+      if (confirmed) {
+        performLogout();
+      }
+    } else {
+      // في الموبايل نستخدم Alert العادية
+      Alert.alert(
+        'تسجيل الخروج',
+        'هل أنت متأكد من تسجيل الخروج؟',
+        [
+          { text: 'إلغاء', style: 'cancel' },
+          {
+            text: 'تسجيل خروج',
+            style: 'destructive',
+            onPress: performLogout,
           },
-        },
-      ]
-    );
+        ]
+      );
+    }
   };
 
   const handleSave = () => {
@@ -237,17 +252,25 @@ export default function ProfileScreen() {
                 secureTextEntry
               />
 
-              <Button
-                title="تغيير الرمز"
-                onPress={handleChangePin}
-                loading={pinLoading}
-                disabled={
-                  !pinData.currentPin ||
-                  !pinData.newPin ||
-                  !pinData.confirmPin
-                }
-                style={styles.changePinButton}
-              />
+              <View style={styles.buttonRow}>
+                <Button
+                   title="إلغاء"
+                   variant="outline"
+                   onPress={() => setChangePinModal(false)}
+                   style={styles.button}
+                />
+                <Button
+                  title="تغيير الرمز"
+                  onPress={handleChangePin}
+                  loading={pinLoading}
+                  disabled={
+                    !pinData.currentPin ||
+                    !pinData.newPin ||
+                    !pinData.confirmPin
+                  }
+                  style={styles.button}
+                />
+              </View>
             </Card>
           </ScrollView>
         </SafeAreaView>
@@ -284,6 +307,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 16,
+    marginTop: 8,
   },
   infoCard: { marginBottom: 16 },
   cardTitle: {
@@ -309,5 +333,4 @@ const styles = StyleSheet.create({
   modalContainer: { flex: 1, backgroundColor: '#0f0f16' },
   modalContent: { flex: 1, padding: 16 },
   modalCard: { marginBottom: 16 },
-  changePinButton: { marginTop: 16 },
 });
