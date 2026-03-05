@@ -3,6 +3,8 @@ export interface User {
   name: string;
   phone_number: string;
   role: 'user' | 'admin';
+  is_wallet_active: boolean;
+  wallet_balance: number;
   created_at: string;
   updated_at: string;
 }
@@ -98,6 +100,12 @@ export interface AppSettings {
   payment_number: string;
   app_name: string;
   app_version: string;
+  wallet_global_limits?: WalletLimits;
+}
+
+export interface WalletLimits {
+  min_deposit: number;
+  max_balance: number;
 }
 
 export interface PaymentMethodDB {

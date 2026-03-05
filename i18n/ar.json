@@ -110,6 +110,18 @@
     "save": "حفظ",
     "saved": "تم الحفظ"
   },
+  "wallet": {
+    "title": "المحفظة الإلكترونية",
+    "balance": "الرصيد الحالي",
+    "currency": "MRU",
+    "inactive_msg": "محفظتك غير مفعلة حالياً. يرجى التواصل مع الإدارة لتفعيل حسابك.",
+    "contact_admin": "التواصل مع الإدارة",
+    "min_usage": "الحد الأدنى للاستخدام",
+    "max_balance": "الحد الأقصى للرصيد",
+    "active": "نشطة",
+    "inactive": "معطلة",
+    "limits": "القيود"
+  },
   "admin": {
     "dashboard": "لوحة التحكم",
     "users": "المستخدمون",
@@ -125,7 +137,10 @@
     "enter_reason": "أدخل سبب الرفض",
     "filter_by_status": "فلترة حسب الحالة",
     "all_statuses": "جميع الحالات",
-    "view_receipt": "عرض الإيصال"
+    "view_receipt": "عرض الإيصال",
+    "activate_wallet": "تفعيل المحفظة",
+    "adjust_balance": "تعديل الرصيد",
+    "manage_wallet": "إدارة المحفظة"
   },
   "common": {
     "confirm": "تأكيد",

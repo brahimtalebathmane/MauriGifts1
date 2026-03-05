@@ -260,6 +260,42 @@ class ApiClient {
       }),
     });
   }
+
+  // Wallet endpoints
+  async adminActivateWallet(token: string, userId: string, activate: boolean) {
+    return this.request('admin_activate_wallet', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        user_id: userId,
+        activate,
+      }),
+    });
+  }
+
+  async adminAdjustWallet(
+    token: string,
+    userId: string,
+    amount: number,
+    operation: 'add' | 'subtract'
+  ) {
+    return this.request('admin_adjust_wallet', {
+      method: 'POST',
+      body: JSON.stringify({
+        token,
+        user_id: userId,
+        amount,
+        operation,
+      }),
+    });
+  }
+
+  async getWalletLimits() {
+    return this.request('get_wallet_limits', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  }
 }
 
 export const apiService = new ApiClient();

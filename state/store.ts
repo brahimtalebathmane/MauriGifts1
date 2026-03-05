@@ -27,6 +27,7 @@ interface AppState {
   refreshData: () => Promise<void>;
   refreshProducts: () => Promise<boolean>;
   refreshCategories: () => Promise<boolean>;
+  refreshWallet: () => Promise<void>;
 
   loadFromStorage: () => Promise<void>;
   saveToStorage: () => Promise<void>;
@@ -45,6 +46,20 @@ export const useAppStore = create<AppState>((set, get) => ({
   setAuth: (user, token) => {
     set({ user, token });
     get().saveToStorage();
+  },
+
+  refreshWallet: async () => {
+    const state = get();
+    if (!state.token) return;
+    try {
+      const response = await apiService.getMe(state.token);
+      if (response.data?.user) {
+        set({ user: response.data.user });
+        get().saveToStorage();
+      }
+    } catch (error) {
+      console.error('Error refreshing wallet:', error);
+    }
   },
 
   setProducts: (products) => set({ products }),

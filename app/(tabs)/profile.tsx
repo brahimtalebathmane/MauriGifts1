@@ -17,6 +17,7 @@ import { showSuccessToast, showErrorToast } from '../../src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import WalletCard from '@/components/wallet/WalletCard';
 
 export default function ProfileScreen() {
   const { user, token, logout } = useAppStore();
@@ -137,6 +138,8 @@ export default function ProfileScreen() {
             </Text>
           </View>
         </Card>
+
+        <WalletCard />
 
         <Card style={styles.infoCard}>
           <Text style={styles.cardTitle}>المعلومات الشخصية</Text>

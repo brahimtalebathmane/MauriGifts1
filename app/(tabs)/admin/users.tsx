@@ -7,16 +7,22 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Users, User } from 'lucide-react-native';
+import { Users, User as UserIcon, Wallet } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
 import { apiService } from '../../../src/services/api';
 import { useI18n } from '@/hooks/useI18n';
-import type { UserData } from '../../../src/types';
+import type { User } from '../../../src/types';
 import { formatPhoneNumber } from '../../../src/utils/formatters';
 import { showErrorToast } from '../../../src/utils/toast';
 import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
+import WalletManagementModal from '@/components/admin/WalletManagementModal';
+
+interface UserData extends User {
+  order_count: number;
+}
 
 export default function AdminUsersScreen() {
   const { token } = useAppStore();
@@ -24,6 +30,8 @@ export default function AdminUsersScreen() {
   const [users, setUsers] = React.useState<UserData[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
+  const [selectedUser, setSelectedUser] = React.useState<UserData | null>(null);
+  const [walletModalVisible, setWalletModalVisible] = React.useState(false);
 
   const loadUsers = async (isRefresh = false) => {
     if (!token) return;
@@ -111,7 +119,7 @@ export default function AdminUsersScreen() {
                   </Text>
                 </View>
                 <View style={styles.userIcon}>
-                  <User size={24} color="#6B7280" />
+                  <UserIcon size={24} color="#6B7280" />
                 </View>
               </View>
 
@@ -138,11 +146,54 @@ export default function AdminUsersScreen() {
                   </Text>
                   <Text style={styles.detailLabel}>تاريخ الانضمام:</Text>
                 </View>
+
+                <View style={styles.detailRow}>
+                  <Text style={[
+                    styles.detailValue,
+                    user.is_wallet_active ? styles.activeWallet : styles.inactiveWallet
+                  ]}>
+                    {user.is_wallet_active ? 'مفعلة' : 'معطلة'}
+                  </Text>
+                  <Text style={styles.detailLabel}>المحفظة:</Text>
+                </View>
+
+                {user.is_wallet_active && (
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailValue}>
+                      {user.wallet_balance.toFixed(2)} MRU
+                    </Text>
+                    <Text style={styles.detailLabel}>الرصيد:</Text>
+                  </View>
+                )}
               </View>
+
+              <Button
+                title={t('admin.manage_wallet')}
+                variant="outline"
+                onPress={() => {
+                  setSelectedUser(user);
+                  setWalletModalVisible(true);
+                }}
+                icon={<Wallet size={20} color="#3b82f6" />}
+                style={styles.walletButton}
+              />
             </Card>
           ))
         )}
       </ScrollView>
+
+      <WalletManagementModal
+        visible={walletModalVisible}
+        user={selectedUser}
+        token={token || ''}
+        onClose={() => {
+          setWalletModalVisible(false);
+          setSelectedUser(null);
+        }}
+        onSuccess={() => {
+          loadUsers(true);
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -232,5 +283,14 @@ const styles = StyleSheet.create({
   },
   skeletonMargin: {
     marginVertical: 8,
+  },
+  activeWallet: {
+    color: '#10b981',
+  },
+  inactiveWallet: {
+    color: '#ef4444',
+  },
+  walletButton: {
+    marginTop: 12,
   },
 });
