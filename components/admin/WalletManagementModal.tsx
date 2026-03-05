@@ -24,7 +24,7 @@ interface WalletManagementModalProps {
   user: User | null;
   token: string;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (updatedUser?: any) => void; // تم التعديل لاستقبال البيانات المحدثة
 }
 
 export default function WalletManagementModal({
@@ -65,7 +65,8 @@ export default function WalletManagementModal({
         showSuccessToast(
           activate ? 'تم تفعيل المحفظة بنجاح' : 'تم تعطيل المحفظة بنجاح'
         );
-        onSuccess();
+        // ✅ نمرر بيانات المستخدم المحدثة التي أعادها السيرفر
+        onSuccess(response.data.user);
       } else {
         showErrorToast(response.error || t('errors.generic'));
       }
@@ -98,7 +99,8 @@ export default function WalletManagementModal({
       if (response.data) {
         showSuccessToast('تم تحديث الرصيد بنجاح');
         setAmount('');
-        onSuccess();
+        // ✅ نمرر بيانات المستخدم المحدثة (التي تحتوي على الرصيد الجديد)
+        onSuccess(response.data.user);
       } else {
         showErrorToast(response.error || t('errors.generic'));
       }
@@ -239,6 +241,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
     alignItems: 'center',
+    backgroundColor: '#1a1a24',
   },
   userName: {
     fontSize: 20,
@@ -253,6 +256,7 @@ const styles = StyleSheet.create({
   section: {
     padding: 20,
     marginBottom: 16,
+    backgroundColor: '#1a1a24',
   },
   sectionHeader: {
     flexDirection: 'row-reverse',
@@ -281,7 +285,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#1a1a24',
+    backgroundColor: '#0f0f16',
     padding: 16,
     borderRadius: 12,
     marginTop: 16,
@@ -306,7 +310,7 @@ const styles = StyleSheet.create({
   infoBox: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
-    backgroundColor: '#fef3c7',
+    backgroundColor: '#332b12',
     padding: 12,
     borderRadius: 8,
     marginVertical: 16,
@@ -315,7 +319,7 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: 14,
-    color: '#92400e',
+    color: '#fcd34d',
     textAlign: 'right',
   },
 });
