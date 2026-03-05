@@ -35,7 +35,7 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "single",
+      "output": "static",
       "favicon": "./assets/images/icon.png",
       "backgroundColor": "#0f0f16",
       "themeColor": "#0f0f16",
@@ -48,7 +48,11 @@
       "dir": "auto",
       "lang": "en"
     },
-    "plugins": ["expo-router", "expo-font", "expo-web-browser"],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-web-browser"
+    ],
     "experiments": {
       "typedRoutes": true
     }
