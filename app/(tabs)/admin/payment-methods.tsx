@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowRight, Wallet, CheckCircle2 } from 'lucide-react-native';
+import { ArrowRight, Wallet, CircleCheck as CheckCircle2 } from 'lucide-react-native';
 import { useAppStore } from '@/state/store';
 import { apiService } from '@/src/services/api';
 import { useI18n } from '@/hooks/useI18n';
