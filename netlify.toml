@@ -2,10 +2,25 @@
   publish = "dist"
   command = "npm run build:web"
 
+# 1. استثناء ملفات Expo من التوجيه لـ index.html (يجب أن تكون قبل القاعدة العامة)
+[[redirects]]
+  from = "/_expo/*"
+  to = "/_expo/:splat"
+  status = 200
+  force = true
+
+# 2. القاعدة العامة للتطبيقات أحادية الصفحة
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+# 3. تحديد أنواع الملفات لضمان عدم حدوث خطأ MIME
+[[headers]]
+  for = "/_expo/static/js/web/*.js"
+  [headers.values]
+    Content-Type = "application/javascript"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/manifest.json"
