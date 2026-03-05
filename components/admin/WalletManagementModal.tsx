@@ -153,7 +153,6 @@ export default function WalletManagementModal({
             <View style={styles.balanceDisplay}>
               <Text style={styles.balanceLabel}>الرصيد الحالي:</Text>
               <Text style={styles.balanceValue}>
-                {/* ✅ تم التعديل هنا لمنع الانهيار باستخدام حماية للقيمة */}
                 {Number(user?.wallet_balance || 0).toFixed(2)} MRU
               </Text>
             </View>
@@ -212,4 +211,111 @@ export default function WalletManagementModal({
   );
 }
 
-// ... ستايلاتك بقيت كما هي دون تغيير
+const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#0f0f16',
+  },
+  modalHeader: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2a2a35',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#f3f3f4',
+    flex: 1,
+    textAlign: 'center',
+  },
+  modalContent: {
+    flex: 1,
+    padding: 16,
+  },
+  userInfoCard: {
+    padding: 16,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  userName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#f3f3f4',
+    marginBottom: 4,
+  },
+  userPhone: {
+    fontSize: 16,
+    color: '#9a9aa5',
+  },
+  section: {
+    padding: 20,
+    marginBottom: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#f3f3f4',
+  },
+  toggleRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2a2a35',
+  },
+  toggleLabel: {
+    fontSize: 16,
+    color: '#f3f3f4',
+  },
+  balanceDisplay: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#1a1a24',
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 16,
+  },
+  balanceLabel: {
+    fontSize: 16,
+    color: '#9a9aa5',
+  },
+  balanceValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#3b82f6',
+  },
+  operationButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  operationButton: {
+    flex: 1,
+  },
+  infoBox: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    backgroundColor: '#fef3c7',
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 16,
+    gap: 8,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#92400e',
+    textAlign: 'right',
+  },
+});
