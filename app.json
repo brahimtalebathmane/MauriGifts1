@@ -23,7 +23,17 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "https://i.postimg.cc/QdBvRCw7/oiljoilk.png"
+      "favicon": "https://i.postimg.cc/QdBvRCw7/oiljoilk.png",
+      "backgroundColor": "#0f0f16",
+      "themeColor": "#0f0f16",
+      "preferRelatedApplications": false,
+      "display": "standalone",
+      "orientation": "portrait",
+      "startUrl": "/",
+      "shortName": "MauriPlay",
+      "description": "MauriPlay - Gaming Platform",
+      "dir": "auto",
+      "lang": "en"
     },
     "plugins": ["expo-router", "expo-font", "expo-web-browser"],
     "experiments": {

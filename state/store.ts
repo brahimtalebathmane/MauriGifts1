@@ -100,39 +100,27 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   logout: async () => {
-    set({ 
-      user: null, 
-      token: null, 
-      orders: [],
-      notifications: [],
-      categories: [],
-      unreadCount: 0,
-      products: {},
-      isLoading: false
-    });
-
     try {
-      await Promise.all([
-        storage.removeItem(STORAGE_KEYS.user),
-        storage.removeItem(STORAGE_KEYS.token),
-      ]);
+      await storage.removeItem(STORAGE_KEYS.user);
+      await storage.removeItem(STORAGE_KEYS.token);
 
       if (typeof window !== 'undefined') {
-        window.localStorage.clear(); // امسح كل localStorage
-
-        try {
-          const { error } = await supabase.auth.signOut();
-          if (error) console.error('Supabase logout error', error.message);
-        } catch (err) {
-          console.error('Supabase logout exception', err);
-        }
-
-        // إعادة توجيه بدون الرجوع للخلف
-        window.location.replace('/auth/login');
+        localStorage.removeItem(STORAGE_KEYS.user);
+        localStorage.removeItem(STORAGE_KEYS.token);
       }
-    } catch (error) {
-      console.error('Error clearing storage:', error);
+    } catch (e) {
+      console.error('logout error', e);
     }
+
+    set({
+      user: null,
+      token: null,
+      orders: [],
+      notifications: [],
+      products: {},
+      categories: [],
+      unreadCount: 0
+    });
   },
 
   loadFromStorage: async () => {
