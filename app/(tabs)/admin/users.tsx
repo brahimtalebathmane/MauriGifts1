@@ -13,7 +13,6 @@ import { useAppStore } from '@/state/store';
 import { apiService } from '../../../src/services/api';
 import { useI18n } from '@/hooks/useI18n';
 import type { User } from '../../../src/types';
-import { formatPhoneNumber } from '../../../src/utils/formatters';
 import { showErrorToast } from '../../../src/utils/toast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -42,7 +41,7 @@ export default function AdminUsersScreen() {
 
     try {
       const response = await apiService.adminListUsers(token);
-      if (response.data) {
+      if (response.data && response.data.users) {
         setUsers(response.data.users);
       } else {
         showErrorToast(response.error || t('errors.generic'));
@@ -63,6 +62,17 @@ export default function AdminUsersScreen() {
   const formatPhoneNumberLocal = (phone: string) => {
     if (!phone) return '';
     return phone.replace(/(\d{2})(\d{2})(\d{2})(\d{2})/, '$1-$2-$3-$4');
+  };
+
+  // دالة تحديث بيانات المستخدم في الحالة المحلية فوراً
+  const handleUpdateUserInState = (updatedUser: any) => {
+    setUsers(prevUsers => 
+      prevUsers.map(u => 
+        u.id === updatedUser.id 
+          ? { ...u, ...updatedUser } 
+          : u
+      )
+    );
   };
 
   if (loading && users.length === 0) {
@@ -159,7 +169,6 @@ export default function AdminUsersScreen() {
                   <Text style={styles.detailLabel}>المحفظة:</Text>
                 </View>
 
-                {/* ✅ تم إصلاح السطر أدناه لمنع الانهيار */}
                 {user.is_wallet_active && (
                   <View style={styles.detailRow}>
                     <Text style={styles.detailValue}>
@@ -196,8 +205,16 @@ export default function AdminUsersScreen() {
           setWalletModalVisible(false);
           setSelectedUser(null);
         }}
-        onSuccess={() => {
-          loadUsers(true);
+        onSuccess={(updatedUserData) => {
+          // ✅ تحديث المستخدم المختار في القائمة فوراً
+          if (updatedUserData) {
+            handleUpdateUserInState(updatedUserData);
+          } else {
+            // في حال لم يرجع المودال بيانات، نقوم بعمل ريفريش خلفي
+            loadUsers(true);
+          }
+          setWalletModalVisible(false);
+          setSelectedUser(null);
         }}
       />
     </SafeAreaView>
